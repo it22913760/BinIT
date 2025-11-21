@@ -13,6 +13,7 @@ struct ContentView: View {
     @State private var showOnboarding: Bool = false
     @AppStorage("tutorial.seen") private var tutorialSeen = false
     @AppStorage("onboarding.seen") private var onboardingSeen = false
+    @AppStorage("debug.alwaysShowOnboarding") private var alwaysShowOnboarding = false
 
     var body: some View {
         ZStack {
@@ -57,9 +58,12 @@ struct ContentView: View {
         .onAppear {
             DispatchQueue.main.asyncAfter(deadline: .now() + 1.2) {
                 withAnimation(.easeInOut(duration: 0.4)) {
+                    if alwaysShowOnboarding {
+                        onboardingSeen = false
+                    }
                     showSplash = false
                     // After splash, show onboarding first if not seen; else show tutorial if not seen
-                    if !onboardingSeen {
+                    if alwaysShowOnboarding || !onboardingSeen {
                         showOnboarding = true
                     } else if !tutorialSeen {
                         showTutorial = true

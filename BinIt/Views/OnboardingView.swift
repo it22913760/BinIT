@@ -16,12 +16,59 @@ struct OnboardingView: View {
             }
 
             TabView(selection: $page) {
-                Color.clear
-                    .background(EcoTheme.offWhite)
-                    .tag(0)
-                Color.clear
-                    .background(EcoTheme.offWhite)
-                    .tag(1)
+                VStack(spacing: 12) {
+                    Image(systemName: "leaf.circle.fill")
+                        .font(.system(size: 48, weight: .heavy))
+                        .foregroundStyle(EcoTheme.green)
+                    Text("Welcome to BinIt")
+                        .font(.system(.title3, design: .rounded).weight(.heavy))
+                    Text("Quickly classify items and learn how to dispose of them responsibly.")
+                        .font(.system(.body, design: .rounded))
+                        .multilineTextAlignment(.center)
+                        .foregroundStyle(.secondary)
+                        .padding(.horizontal)
+                }
+                .padding(16)
+                .background(EcoTheme.offWhite)
+                .tag(0)
+
+                VStack(spacing: 12) {
+                    Image(systemName: "camera.viewfinder")
+                        .font(.system(size: 48, weight: .heavy))
+                    Text("How it works")
+                        .font(.system(.title3, design: .rounded).weight(.heavy))
+                    VStack(spacing: 8) {
+                        Text("1. Scan or pick a photo of an item.")
+                        Text("2. We classify it and suggest a category.")
+                        Text("3. Save to history for quick access.")
+                    }
+                    .font(.system(.body, design: .rounded))
+                    .multilineTextAlignment(.center)
+                    .foregroundStyle(.secondary)
+                    .padding(.horizontal)
+                }
+                .padding(16)
+                .background(EcoTheme.offWhite)
+                .tag(1)
+
+                VStack(spacing: 12) {
+                    Text("Categories")
+                        .font(.system(.title3, design: .rounded).weight(.heavy))
+                    VStack(alignment: .leading, spacing: 10) {
+                        Text("♻️ Recyclables: Paper, cardboard, cans, bottles")
+                        Text("🧴 Plastic: Containers, bottles, wraps (check local rules)")
+                        Text("🍎 Organic: Food scraps, yard waste")
+                        Text("🧪 Hazardous: Batteries, e‑waste, chemicals")
+                        Text("🗑️ General: Items that can’t be recycled")
+                    }
+                    .font(.system(.body, design: .rounded))
+                    .multilineTextAlignment(.leading)
+                    .foregroundStyle(.secondary)
+                    .padding(.horizontal)
+                }
+                .padding(16)
+                .background(EcoTheme.offWhite)
+                .tag(2)
             }
             .tabViewStyle(.page(indexDisplayMode: .always))
 
@@ -33,7 +80,7 @@ struct OnboardingView: View {
 
                 Spacer()
 
-                if page < 1 {
+                if page < 2 {
                     Button(NSLocalizedString("next", comment: "")) { page += 1 }
                         .buttonStyle(BWNeubrutalistButtonStyle())
                 } else {

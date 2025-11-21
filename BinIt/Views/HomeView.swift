@@ -12,8 +12,10 @@ struct HomeView: View {
     @State private var showScanner = false
     @State private var showSettings = false
     @State private var showTutorial = false
+    @State private var showOnboarding = false
     @AppStorage("tutorial.seen") private var tutorialSeen = false
     @AppStorage("onboarding.seen") private var onboardingSeen = false
+    @AppStorage("debug.alwaysShowOnboarding") private var alwaysShowOnboarding = false
     @AppStorage("scanner.usePhotoLibrary") private var usePhotoLibrary = !UIImagePickerController.isSourceTypeAvailable(.camera)
 
     // Define settings sheet view before body to ensure scope visibility
@@ -32,8 +34,14 @@ struct HomeView: View {
                 .pickerStyle(.segmented)
                 .frame(width: 200)
             }
+            Toggle("Always show onboarding on launch (debug)", isOn: $alwaysShowOnboarding)
+                .font(.system(.subheadline, design: .rounded).weight(.heavy))
             Button(NSLocalizedString("view_tutorial", comment: "View Tutorial")) {
                 showTutorial = true
+            }
+            .buttonStyle(BWNeubrutalistButtonStyle())
+            Button(NSLocalizedString("view_onboarding", comment: "View Onboarding")) {
+                showOnboarding = true
             }
             .buttonStyle(BWNeubrutalistButtonStyle())
             Text(NSLocalizedString("sim_tip", comment: "Simulator tip"))
@@ -96,6 +104,15 @@ struct HomeView: View {
                 TutorialView {
                     tutorialSeen = true
                     showTutorial = false
+                }
+            }
+            .presentationDetents([.medium, .large])
+        }
+        .sheet(isPresented: $showOnboarding) {
+            NavigationStack {
+                OnboardingView {
+                    onboardingSeen = true
+                    showOnboarding = false
                 }
             }
             .presentationDetents([.medium, .large])
