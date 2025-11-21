@@ -85,6 +85,8 @@ struct HomeView: View {
             HStack(spacing: 16) {
                 statCard(title: NSLocalizedString("items_saved", comment: "Items Saved"), value: "\(items.count)", color: EcoTheme.yellow)
                 statCard(title: NSLocalizedString("co2_saved", comment: "CO2 Saved"), value: String(format: "%.1f kg", co2Saved()), color: EcoTheme.blue)
+                statCard(title: NSLocalizedString("top_category", comment: "Top Category"), value: topCategoryRecent(), color: EcoTheme.green)
+                statCard(title: NSLocalizedString("category_diversity", comment: "Category Diversity"), value: categoryDiversityText(), color: EcoTheme.lavender)
             }
         }
     }
@@ -113,8 +115,8 @@ struct HomeView: View {
                         if let ui = UIImage(data: item.imageData) {
                             Image(uiImage: ui)
                                 .resizable()
-                                .scaledToFill()
-                                .frame(height: 120)
+                                .frame(maxWidth: .infinity)
+                                .aspectRatio(1, contentMode: .fill)
                                 .clipped()
                                 .clipShape(RoundedRectangle(cornerRadius: 16))
                                 .overlay(RoundedRectangle(cornerRadius: 16).stroke(EcoTheme.border, lineWidth: 1))
@@ -158,6 +160,31 @@ struct HomeView: View {
     private func co2Saved() -> Double {
         // Simple heuristic: each correctly recycled item saves ~0.15kg CO2 eq.
         max(0.0, Double(items.count) * 0.15)
+    }
+
+    private func topCategoryRecent(limit: Int = 10) -> String {
+        let recent = Array(items.prefix(limit))
+        guard !recent.isEmpty else { return "—" }
+        let counts = Dictionary(grouping: recent, by: { $0.category })
+            .mapValues { $0.count }
+        if let top = counts.max(by: { $0.value < $1.value })?.key {
+            return categoryDisplayName(top)
+        }
+        return "—"
+    }
+
+    private func categoryDiversityText() -> String {
+        let totalCategories = ItemCategory.allCases.count
+        let distinct = Set(items.map { $0.category }).count
+        return "\(distinct) of \(totalCategories)"
+    }
+
+    private func categoryDisplayName(_ category: ItemCategory) -> String {
+        switch category {
+        case .recyclable: return "♻️ " + category.rawValue.capitalized
+        case .compost: return "🌿 " + category.rawValue.capitalized
+        case .trash: return "🗑️ " + category.rawValue.capitalized
+        }
     }
 }
 

@@ -1,6 +1,8 @@
 "app_title" = "BinIt";
 "items_saved" = "Items Saved";
 "co2_saved" = "CO2 Saved";
+"top_category" = "Top Category";
+"category_diversity" = "Category Diversity";
 "recent" = "Recent";
 "settings_title" = "Settings";
 "scanner_source" = "Scanner Source";
