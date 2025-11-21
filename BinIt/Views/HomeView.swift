@@ -1,0 +1,167 @@
+import SwiftUI
+import SwiftData
+import UIKit
+
+struct HomeView: View {
+    @Environment(\.modelContext) private var modelContext
+    @Query(sort: [SortDescriptor(\RecycledItem.timestamp, order: .reverse)]) private var items: [RecycledItem]
+    @State private var showScanner = false
+    @State private var showSettings = false
+    @AppStorage("scanner.usePhotoLibrary") private var usePhotoLibrary = !UIImagePickerController.isSourceTypeAvailable(.camera)
+
+    // Define settings sheet view before body to ensure scope visibility
+    private var settingsSheet: some View {
+        VStack(alignment: .leading, spacing: 16) {
+            Text(NSLocalizedString("settings_title", comment: "Settings"))
+                .font(.system(.title3, design: .rounded).weight(.heavy))
+            HStack(spacing: 12) {
+                Text(NSLocalizedString("scanner_source", comment: "Scanner Source"))
+                    .font(.system(.subheadline, design: .rounded).weight(.heavy))
+                Spacer()
+                Picker(NSLocalizedString("source", comment: "Source"), selection: $usePhotoLibrary) {
+                    Text(NSLocalizedString("source_camera", comment: "Camera")).tag(false)
+                    Text(NSLocalizedString("source_photos", comment: "Photos")).tag(true)
+                }
+                .pickerStyle(.segmented)
+                .frame(width: 200)
+            }
+            Text(NSLocalizedString("sim_tip", comment: "Simulator tip"))
+                .font(.system(.caption, design: .rounded))
+                .foregroundStyle(.secondary)
+            Spacer()
+        }
+        .padding(20)
+        .background(EcoTheme.offWhite)
+    }
+
+    var body: some View {
+        ZStack {
+            EcoTheme.offWhite.ignoresSafeArea()
+
+            ScrollView {
+                VStack(alignment: .leading, spacing: 20) {
+                    header
+                    statsScroll
+                    recentGrid
+                    Spacer(minLength: 16)
+                }
+                .padding(20)
+            }
+            .scrollIndicators(.hidden)
+            .safeAreaInset(edge: .bottom) { Color.clear.frame(height: 100) }
+        }
+        .overlay(alignment: .bottom) {
+            fabButton
+        }
+        .navigationTitle(NSLocalizedString("app_title", comment: "App title"))
+        .navigationBarTitleDisplayMode(.large)
+        .toolbar {
+            ToolbarItem(placement: .topBarTrailing) {
+                Button {
+                    showSettings = true
+                } label: {
+                    Image(systemName: "gearshape.fill")
+                        .foregroundStyle(.black)
+                }
+                .buttonStyle(.plain)
+            }
+        }
+        .sheet(isPresented: $showSettings) {
+            NavigationStack { settingsSheet }
+                .presentationDetents([.height(220)])
+        }
+    }
+
+    
+
+    private var header: some View {
+        Text(NSLocalizedString("app_title", comment: "App title"))
+            .font(.system(size: 40, weight: .heavy, design: .rounded))
+            .kerning(-0.5)
+    }
+
+    private var statsScroll: some View {
+        ScrollView(.horizontal, showsIndicators: false) {
+            HStack(spacing: 16) {
+                statCard(title: NSLocalizedString("items_saved", comment: "Items Saved"), value: "\(items.count)", color: EcoTheme.yellow)
+                statCard(title: NSLocalizedString("co2_saved", comment: "CO2 Saved"), value: String(format: "%.1f kg", co2Saved()), color: EcoTheme.blue)
+            }
+        }
+    }
+
+    private func statCard(title: String, value: String, color: Color) -> some View {
+        VStack(alignment: .leading, spacing: 8) {
+            Text(title)
+                .font(.system(.subheadline, design: .rounded).weight(.heavy))
+            Text(value)
+                .font(.system(size: 28, weight: .heavy, design: .rounded))
+        }
+        .padding(16)
+        .frame(width: 180, height: 100, alignment: .leading)
+        .background(color)
+        .ecoCard()
+    }
+
+    private var recentGrid: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            Text(NSLocalizedString("recent", comment: "Recent"))
+                .font(.system(.title3, design: .rounded).weight(.heavy))
+
+            LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: 12) {
+                ForEach(items.prefix(10)) { item in
+                    VStack(alignment: .leading, spacing: 8) {
+                        if let ui = UIImage(data: item.imageData) {
+                            Image(uiImage: ui)
+                                .resizable()
+                                .scaledToFill()
+                                .frame(height: 120)
+                                .clipped()
+                                .clipShape(RoundedRectangle(cornerRadius: 16))
+                                .overlay(RoundedRectangle(cornerRadius: 16).stroke(EcoTheme.border, lineWidth: 1))
+                        }
+                        Text(item.name)
+                            .font(.system(.headline, design: .rounded).weight(.heavy))
+                            .lineLimit(1)
+                        Text("\(item.category.rawValue.capitalized) • \(Int(item.confidence * 100))%")
+                            .font(.system(.caption, design: .rounded))
+                            .foregroundStyle(.secondary)
+                    }
+                    .padding(12)
+                    .background(EcoTheme.pink)
+                    .ecoCard()
+                }
+            }
+        }
+    }
+
+    private var fabButton: some View {
+        Button {
+            withAnimation(.spring()) { showScanner = true }
+        } label: {
+            HStack(spacing: 10) {
+                Image(systemName: "camera.fill")
+                    .font(.system(size: 20, weight: .heavy, design: .rounded))
+                    .foregroundColor(.black)
+                Text(NSLocalizedString("scan", comment: "Scan"))
+                    .font(.system(.headline, design: .rounded).weight(.heavy))
+                    .foregroundColor(.black)
+            }
+        }
+        .buttonStyle(BWNeubrutalistButtonStyle())
+        .padding(.bottom, 24)
+        .fullScreenCover(isPresented: $showScanner) {
+            NavigationStack { ScannerView() }
+                .tint(.black)
+        }
+    }
+
+    private func co2Saved() -> Double {
+        // Simple heuristic: each correctly recycled item saves ~0.15kg CO2 eq.
+        max(0.0, Double(items.count) * 0.15)
+    }
+}
+
+#Preview {
+    NavigationStack { HomeView() }
+        .preferredColorScheme(.light)
+}

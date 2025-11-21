@@ -29,9 +29,34 @@
 		3F3FC7152ECDB099009E6F04 /* BinItUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = BinItUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
+/* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
+		3F3FC7792ECDC27A009E6F04 /* Exceptions for "BinIt" folder in "BinItTests" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Models/MobileNetV2.mlmodel,
+				Models/MobileNetV2FP16.mlmodel,
+				Models/MobileNetV2Int8LUT.mlmodel,
+			);
+			target = 3F3FC70A2ECDB099009E6F04 /* BinItTests */;
+		};
+		3F3FC77A2ECDC27A009E6F04 /* Exceptions for "BinIt" folder in "BinItUITests" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Models/MobileNetV2.mlmodel,
+				Models/MobileNetV2FP16.mlmodel,
+				Models/MobileNetV2Int8LUT.mlmodel,
+			);
+			target = 3F3FC7142ECDB099009E6F04 /* BinItUITests */;
+		};
+/* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
+
 /* Begin PBXFileSystemSynchronizedRootGroup section */
 		3F3FC6FD2ECDB098009E6F04 /* BinIt */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				3F3FC7792ECDC27A009E6F04 /* Exceptions for "BinIt" folder in "BinItTests" target */,
+				3F3FC77A2ECDC27A009E6F04 /* Exceptions for "BinIt" folder in "BinItUITests" target */,
+			);
 			path = BinIt;
 			sourceTree = "<group>";
 		};

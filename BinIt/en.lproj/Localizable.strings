@@ -1,0 +1,28 @@
+"app_title" = "BinIt";
+"items_saved" = "Items Saved";
+"co2_saved" = "CO2 Saved";
+"recent" = "Recent";
+"settings_title" = "Settings";
+"scanner_source" = "Scanner Source";
+"source" = "Source";
+"source_camera" = "Camera";
+"source_photos" = "Photos";
+"sim_tip" = "Tip: On Simulator, Photos is recommended.";
+
+"result_title" = "Result";
+"done" = "Done";
+"no_image" = "No Image";
+"confidence" = "Confidence";
+"badge_recycle" = "Recycle Me";
+"badge_compost" = "Compostable";
+"badge_trash" = "Trash Can";
+"discard" = "Discard";
+"save" = "Save";
+"unknown_item" = "Unknown";
+"mark_trash" = "Trash";
+
+"scanner_title" = "Scanner";
+"close" = "Close";
+"capture" = "Capture";
+"simulator_fallback" = "Simulator detected or camera unavailable — using Photo Library fallback";
+"scan" = "Scan";
