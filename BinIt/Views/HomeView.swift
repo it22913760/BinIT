@@ -1,12 +1,14 @@
 import SwiftUI
+import CoreData
 import UIKit
 
 struct HomeView: View {
     @Environment(\.managedObjectContext) private var moc
     @FetchRequest(
-        sortDescriptors: [SortDescriptor(\RecycledItemMO.timestamp, order: .reverse)],
+        entity: RecycledItem.entity(),
+        sortDescriptors: [NSSortDescriptor(keyPath: \RecycledItem.timestamp, ascending: false)],
         animation: .default
-    ) private var items: FetchedResults<RecycledItemMO>
+    ) private var items: FetchedResults<RecycledItem>
     @State private var showScanner = false
     @State private var showSettings = false
     @State private var showTutorial = false
@@ -140,9 +142,9 @@ struct HomeView: View {
                 .font(.system(.title3, design: .rounded).weight(.heavy))
 
             LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: 12) {
-                ForEach(items.prefix(10)) { item in
+                ForEach(Array(items.prefix(10))) { item in
                     VStack(alignment: .leading, spacing: 8) {
-                        if let ui = UIImage(data: item.imageData) {
+                        if let data = item.imageData, let ui = UIImage(data: data) {
                             Image(uiImage: ui)
                                 .resizable()
                                 .frame(maxWidth: .infinity)
@@ -151,10 +153,10 @@ struct HomeView: View {
                                 .clipShape(RoundedRectangle(cornerRadius: 16))
                                 .overlay(RoundedRectangle(cornerRadius: 16).stroke(EcoTheme.border, lineWidth: 1))
                         }
-                        Text(item.name)
+                        Text(item.name ?? "")
                             .font(.system(.headline, design: .rounded).weight(.heavy))
                             .lineLimit(1)
-                        Text("\(item.itemCategory.rawValue.capitalized) • \(Int(item.confidence * 100))%")
+                        Text("\(item.itemCategory.rawValue.capitalized) • \(Int((item.confidence) * 100))%")
                             .font(.system(.caption, design: .rounded))
                             .foregroundStyle(.secondary)
                     }
@@ -195,7 +197,7 @@ struct HomeView: View {
     private func topCategoryRecent(limit: Int = 10) -> String {
         let recent = Array(items.prefix(limit))
         guard !recent.isEmpty else { return "—" }
-        let counts = Dictionary(grouping: recent, by: { $0.category })
+        let counts = Dictionary(grouping: recent, by: { $0.itemCategory })
             .mapValues { $0.count }
         if let top = counts.max(by: { $0.value < $1.value })?.key {
             return categoryDisplayName(top)
@@ -205,7 +207,7 @@ struct HomeView: View {
 
     private func categoryDiversityText() -> String {
         let totalCategories = ItemCategory.allCases.count
-        let distinct = Set(items.map { $0.category }).count
+        let distinct = Set(items.map { $0.itemCategory }).count
         return "\(distinct) of \(totalCategories)"
     }
 

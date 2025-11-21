@@ -7,8 +7,28 @@ final class CoreDataStack {
     let persistentContainer: NSPersistentContainer
 
     private init() {
-        let model = CoreDataStack.buildModel()
-        persistentContainer = NSPersistentContainer(name: "BinItModel", managedObjectModel: model)
+        // Try to load the compiled .xcdatamodeld (BinItModel.momd) first.
+        // Validate it contains the expected entity; otherwise fall back to the programmatic model.
+        let container: NSPersistentContainer
+        if let modelURL = Bundle.main.url(forResource: "BinItModel", withExtension: "momd"),
+           let bundledModel = NSManagedObjectModel(contentsOf: modelURL),
+           let recycled = bundledModel.entitiesByName["RecycledItem"],
+           Set(recycled.attributesByName.keys).isSuperset(of: [
+               "id", "name", "category", "confidence", "timestamp", "imageData"
+           ]) {
+            container = NSPersistentContainer(name: "BinItModel", managedObjectModel: bundledModel)
+            #if DEBUG
+            print("[CoreData] Loaded model from xcdatamodeld (BinItModel.momd)")
+            #endif
+        } else {
+            // Fallback to programmatic model if the xcdatamodeld isn't present or is missing entities
+            let programmaticModel = CoreDataStack.buildModel()
+            container = NSPersistentContainer(name: "BinItModel", managedObjectModel: programmaticModel)
+            #if DEBUG
+            print("[CoreData] Loaded programmatic Core Data model (no valid xcdatamodeld found)")
+            #endif
+        }
+        persistentContainer = container
         persistentContainer.loadPersistentStores { _, error in
             if let error = error { fatalError("Core Data store failed: \(error)") }
         }
@@ -22,7 +42,8 @@ final class CoreDataStack {
         // RecycledItem entity
         let entity = NSEntityDescription()
         entity.name = "RecycledItem"
-        entity.managedObjectClassName = String(describing: RecycledItemMO.self)
+        // Use fully-qualified class name so Core Data can resolve the generated class at runtime
+        entity.managedObjectClassName = NSStringFromClass(RecycledItem.self)
 
         // Attributes
         let idAttr = NSAttributeDescription()

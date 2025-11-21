@@ -128,5 +128,5 @@ struct ResultView: View {
 
 #Preview {
     ResultView(image: UIImage(systemName: "leaf")?.withTintColor(.black, renderingMode: .alwaysOriginal),
-               result: ClassificationResult(name: "Plastic Bottle", category: .recyclable, confidence: 0.92)) { _ in }
+               result: ClassificationResult(name: "Plastic Bottle", category: .recyclable, confidence: 0.92)) { _, _, _, _ in }
 }

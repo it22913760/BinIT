@@ -27,10 +27,10 @@ public actor DataManager {
         imageData: Data,
         timestamp: Date = Date(),
         in context: NSManagedObjectContext
-    ) async throws -> RecycledItemMO {
-        var created: RecycledItemMO!
+    ) async throws -> RecycledItem {
+        var created: RecycledItem!
         try await MainActor.run {
-            created = RecycledItemMO(context: context)
+            created = RecycledItem(context: context)
             created.id = UUID()
             created.name = name
             created.itemCategory = category
@@ -47,10 +47,10 @@ public actor DataManager {
     ///   - limit: Maximum number of items to return. Pass nil for all.
     ///   - context: The Core Data context from the environment.
     /// - Returns: Items sorted by `timestamp` descending.
-    public func fetch(limit: Int? = nil, in context: NSManagedObjectContext) async throws -> [RecycledItemMO] {
+    public func fetch(limit: Int? = nil, in context: NSManagedObjectContext) async throws -> [RecycledItem] {
         try await MainActor.run {
-            let request: NSFetchRequest<RecycledItemMO> = RecycledItemMO.fetchRequest()
-            let sort = NSSortDescriptor(key: #keyPath(RecycledItemMO.timestamp), ascending: false)
+            let request: NSFetchRequest<RecycledItem> = RecycledItem.fetchRequest()
+            let sort = NSSortDescriptor(key: #keyPath(RecycledItem.timestamp), ascending: false)
             request.sortDescriptors = [sort]
             if let limit = limit { request.fetchLimit = limit }
             return try context.fetch(request)
@@ -58,7 +58,7 @@ public actor DataManager {
     }
 
     /// Deletes a given item.
-    public func delete(_ item: RecycledItemMO, in context: NSManagedObjectContext) async throws {
+    public func delete(_ item: RecycledItem, in context: NSManagedObjectContext) async throws {
         try await MainActor.run {
             context.delete(item)
             try context.save()
