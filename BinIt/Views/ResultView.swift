@@ -3,7 +3,7 @@ import SwiftUI
 struct ResultView: View {
     var image: UIImage?
     var result: ClassificationResult?
-    var onSave: (RecycledItem) -> Void
+    var onSave: (_ name: String, _ category: ItemCategory, _ confidence: Double, _ imageData: Data) -> Void
 
     @State private var showBadge = false
     @Environment(\.dismiss) private var dismiss
@@ -100,8 +100,7 @@ struct ResultView: View {
 
             Button {
                 guard let res = result, let img = image, let data = img.jpegData(compressionQuality: 0.85) else { return }
-                let item = RecycledItem(name: res.name, category: res.category, confidence: res.confidence, imageData: data)
-                onSave(item)
+                onSave(res.name, res.category, res.confidence, data)
             } label: {
                 HStack(spacing: 10) {
                     Image(systemName: "tray.and.arrow.down.fill")
@@ -114,8 +113,7 @@ struct ResultView: View {
             Button {
                 guard let img = image, let data = img.jpegData(compressionQuality: 0.85) else { return }
                 let name = result?.name ?? NSLocalizedString("unknown_item", comment: "Unknown")
-                let item = RecycledItem(name: name, category: .trash, confidence: result?.confidence ?? 0, imageData: data)
-                onSave(item)
+                onSave(name, .trash, result?.confidence ?? 0, data)
             } label: {
                 HStack(spacing: 10) {
                     Image(systemName: "trash.fill")

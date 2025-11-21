@@ -1,11 +1,11 @@
 import SwiftUI
-import SwiftData
+import CoreData
 import UIKit
 
 struct ScannerView: View {
     @Environment(\.dismiss) private var dismiss
     @StateObject private var vm = ScannerViewModel()
-    @Environment(\.modelContext) private var modelContext
+    @Environment(\.managedObjectContext) private var moc
 
     @State private var showCamera = false
     @State private var navigateToResult = false
@@ -70,10 +70,16 @@ struct ScannerView: View {
             .ignoresSafeArea()
         }
         .navigationDestination(isPresented: $navigateToResult) {
-            ResultView(image: vm.capturedImage, result: vm.result) { item in
-                // Save tapped using the provided item
+            ResultView(image: vm.capturedImage, result: vm.result) { name, category, confidence, imageData in
+                // Save tapped using the provided fields into Core Data
                 Task {
-                    try? await DataManager.shared.save(item, in: modelContext)
+                    _ = try? await DataManager.shared.createAndSave(
+                        name: name,
+                        category: category,
+                        confidence: confidence,
+                        imageData: imageData,
+                        in: moc
+                    )
                     withAnimation(.spring()) { showSavedToast = true }
                     // Short delay to show toast, then dismiss
                     try? await Task.sleep(nanoseconds: 800_000_000)

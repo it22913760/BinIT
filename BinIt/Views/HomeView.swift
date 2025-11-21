@@ -1,10 +1,12 @@
 import SwiftUI
-import SwiftData
 import UIKit
 
 struct HomeView: View {
-    @Environment(\.modelContext) private var modelContext
-    @Query(sort: [SortDescriptor(\RecycledItem.timestamp, order: .reverse)]) private var items: [RecycledItem]
+    @Environment(\.managedObjectContext) private var moc
+    @FetchRequest(
+        sortDescriptors: [SortDescriptor(\RecycledItemMO.timestamp, order: .reverse)],
+        animation: .default
+    ) private var items: FetchedResults<RecycledItemMO>
     @State private var showScanner = false
     @State private var showSettings = false
     @State private var showTutorial = false
@@ -152,7 +154,7 @@ struct HomeView: View {
                         Text(item.name)
                             .font(.system(.headline, design: .rounded).weight(.heavy))
                             .lineLimit(1)
-                        Text("\(item.category.rawValue.capitalized) • \(Int(item.confidence * 100))%")
+                        Text("\(item.itemCategory.rawValue.capitalized) • \(Int(item.confidence * 100))%")
                             .font(.system(.caption, design: .rounded))
                             .foregroundStyle(.secondary)
                     }
