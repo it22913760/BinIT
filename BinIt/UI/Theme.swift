@@ -7,6 +7,7 @@ struct EcoTheme {
     static let pink = Color(red: 0.95, green: 0.77, blue: 0.85)     // #F3C4D8
     static let blue = Color(red: 0.54, green: 0.81, blue: 0.94)     // #89CFF0
     static let green = Color(red: 0.27, green: 0.75, blue: 0.43)
+    static let lime = Color(red: 0.74, green: 0.90, blue: 0.45)     // fresh lime green
     static let red = Color(red: 0.95, green: 0.27, blue: 0.27)
     static let lavender = Color(red: 0.80, green: 0.72, blue: 0.95)  // approx neubrutalist lavender
 
@@ -23,6 +24,25 @@ struct EcoTheme {
                 )
                 .shadow(color: .black.opacity(0.15), radius: 0, x: 4, y: 4)
         }
+    }
+}
+
+struct IconCircleButtonStyle: ButtonStyle {
+    func makeBody(configuration: Configuration) -> some View {
+        configuration.label
+            .foregroundColor(.black)
+            .frame(width: 38, height: 38)
+            .background(
+                ZStack {
+                    Circle().fill(Color.white)
+                    Circle().strokeBorder(Color.black, lineWidth: 3)
+                }
+                .compositingGroup()
+                .shadow(color: .black, radius: 0, x: 6, y: 6)
+            )
+            .contentShape(Circle())
+            .scaleEffect(configuration.isPressed ? 1.03 : 1.0)
+            .animation(.spring(response: 0.25, dampingFraction: 0.85), value: configuration.isPressed)
     }
 }
 

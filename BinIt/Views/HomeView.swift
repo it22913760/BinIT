@@ -16,6 +16,8 @@ struct HomeView: View {
     @AppStorage("tutorial.seen") private var tutorialSeen = false
     @AppStorage("onboarding.seen") private var onboardingSeen = false
     @AppStorage("debug.alwaysShowOnboarding") private var alwaysShowOnboarding = false
+    @AppStorage("auth.loggedIn") private var loggedIn = false
+    @AppStorage("debug.alwaysShowLogin") private var alwaysShowLogin = false
     @AppStorage("scanner.usePhotoLibrary") private var usePhotoLibrary = !UIImagePickerController.isSourceTypeAvailable(.camera)
 
     // Define settings sheet view before body to ensure scope visibility
@@ -36,6 +38,8 @@ struct HomeView: View {
             }
             Toggle("Always show onboarding on launch (debug)", isOn: $alwaysShowOnboarding)
                 .font(.system(.subheadline, design: .rounded).weight(.heavy))
+            Toggle("Always show login on launch (debug)", isOn: $alwaysShowLogin)
+                .font(.system(.subheadline, design: .rounded).weight(.heavy))
             Button(NSLocalizedString("view_tutorial", comment: "View Tutorial")) {
                 showTutorial = true
             }
@@ -44,6 +48,10 @@ struct HomeView: View {
                 showOnboarding = true
             }
             .buttonStyle(BWNeubrutalistButtonStyle())
+            Button("Log out") {
+                loggedIn = false
+            }
+            .buttonStyle(DestructiveCapsuleButtonStyle())
             Text(NSLocalizedString("sim_tip", comment: "Simulator tip"))
                 .font(.system(.caption, design: .rounded))
                 .foregroundStyle(.secondary)
@@ -72,32 +80,35 @@ struct HomeView: View {
         .overlay(alignment: .bottom) {
             fabButton
         }
-        .navigationTitle(NSLocalizedString("app_title", comment: "App title"))
-        .navigationBarTitleDisplayMode(.large)
+        .navigationTitle("")
+        .navigationBarTitleDisplayMode(.inline)
         .toolbar {
             ToolbarItem(placement: .topBarTrailing) {
                 Button {
                     showSettings = true
                 } label: {
                     Image(systemName: "gearshape.fill")
-                        .foregroundStyle(.black)
+                        .font(.system(size: 14, weight: .heavy, design: .rounded))
                 }
-                .buttonStyle(.plain)
+                .buttonStyle(IconCircleButtonStyle())
             }
             ToolbarItem(placement: .topBarLeading) {
                 Button {
                     showTutorial = true
                 } label: {
                     Image(systemName: "questionmark.circle.fill")
-                        .foregroundStyle(.black)
+                        .font(.system(size: 14, weight: .heavy, design: .rounded))
                 }
-                .buttonStyle(.plain)
+                .buttonStyle(IconCircleButtonStyle())
                 .accessibilityLabel(Text("Help"))
             }
         }
         .sheet(isPresented: $showSettings) {
-            NavigationStack { settingsSheet }
-                .presentationDetents([.height(220)])
+            NavigationStack {
+                ScrollView { settingsSheet }
+                    .scrollIndicators(.hidden)
+            }
+            .presentationDetents([.medium, .large])
         }
         .sheet(isPresented: $showTutorial) {
             NavigationStack {
@@ -126,7 +137,7 @@ struct HomeView: View {
     
 
     private var header: some View {
-        Text("Welcome")
+        Text("BinIt")
             .font(.system(size: 40, weight: .heavy, design: .rounded))
             .kerning(-0.5)
     }
@@ -134,11 +145,12 @@ struct HomeView: View {
     private var statsScroll: some View {
         ScrollView(.horizontal, showsIndicators: false) {
             HStack(spacing: 16) {
-                statCard(title: NSLocalizedString("items_saved", comment: "Items Saved"), value: "\(items.count)", color: EcoTheme.yellow)
-                statCard(title: NSLocalizedString("co2_saved", comment: "CO2 Saved"), value: String(format: "%.1f kg", co2Saved()), color: EcoTheme.blue)
-                statCard(title: NSLocalizedString("top_category", comment: "Top Category"), value: topCategoryRecent(), color: EcoTheme.green)
-                statCard(title: NSLocalizedString("category_diversity", comment: "Category Diversity"), value: categoryDiversityText(), color: EcoTheme.lavender)
+                statCard(title: NSLocalizedString("items_saved", comment: "Items Saved"), value: "\(items.count)", color: EcoTheme.lime)
+                statCard(title: NSLocalizedString("co2_saved", comment: "CO2 Saved"), value: String(format: "%.1f kg", co2Saved()), color: EcoTheme.lime)
+                statCard(title: NSLocalizedString("top_category", comment: "Top Category"), value: topCategoryRecent(), color: EcoTheme.lime)
+                statCard(title: NSLocalizedString("category_diversity", comment: "Category Diversity"), value: categoryDiversityText(), color: EcoTheme.lime)
             }
+            .padding(.vertical, 8)
         }
     }
 
@@ -150,7 +162,7 @@ struct HomeView: View {
                 .font(.system(size: 28, weight: .heavy, design: .rounded))
         }
         .padding(16)
-        .frame(width: 180, height: 100, alignment: .leading)
+        .frame(width: 180, height: 112, alignment: .leading)
         .background(color)
         .ecoCard()
     }
@@ -241,9 +253,9 @@ struct HomeView: View {
     private func recentColor(for category: ItemCategory) -> Color {
         switch category {
         case .recyclable:
-            return EcoTheme.green
+            return EcoTheme.blue
         case .compost:
-            return EcoTheme.yellow
+            return EcoTheme.green
         case .trash:
             return EcoTheme.red
         }

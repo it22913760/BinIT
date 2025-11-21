@@ -11,9 +11,12 @@ struct ContentView: View {
     @State private var showSplash: Bool = true
     @State private var showTutorial: Bool = false
     @State private var showOnboarding: Bool = false
+    @State private var showLogin: Bool = false
     @AppStorage("tutorial.seen") private var tutorialSeen = false
     @AppStorage("onboarding.seen") private var onboardingSeen = false
     @AppStorage("debug.alwaysShowOnboarding") private var alwaysShowOnboarding = false
+    @AppStorage("auth.loggedIn") private var loggedIn = false
+    @AppStorage("debug.alwaysShowLogin") private var alwaysShowLogin = false
 
     var body: some View {
         ZStack {
@@ -21,7 +24,7 @@ struct ContentView: View {
                 HomeView()
                     .tint(.black)
             }
-            .opacity((showSplash || showOnboarding || showTutorial) ? 0 : 1)
+            .opacity((showSplash || showOnboarding || showTutorial || showLogin) ? 0 : 1)
 
             if showSplash {
                 SplashView()
@@ -35,7 +38,11 @@ struct ContentView: View {
                         withAnimation(.easeInOut(duration: 0.3)) {
                             showOnboarding = false
                             // After onboarding, show tutorial if not seen
-                            if !tutorialSeen { showTutorial = true }
+                            if !tutorialSeen {
+                                showTutorial = true
+                            } else if (!loggedIn || alwaysShowLogin) {
+                                showLogin = true
+                            }
                         }
                     }
                 }
@@ -49,6 +56,21 @@ struct ContentView: View {
                         tutorialSeen = true
                         withAnimation(.easeInOut(duration: 0.3)) {
                             showTutorial = false
+                            if (!loggedIn || alwaysShowLogin) {
+                                showLogin = true
+                            }
+                        }
+                    }
+                }
+                .transition(.opacity)
+            }
+
+            if showLogin {
+                NavigationStack {
+                    LoginView {
+                        loggedIn = true
+                        withAnimation(.easeInOut(duration: 0.3)) {
+                            showLogin = false
                         }
                     }
                 }
@@ -61,13 +83,25 @@ struct ContentView: View {
                     if alwaysShowOnboarding {
                         onboardingSeen = false
                     }
+                    if alwaysShowLogin {
+                        loggedIn = false
+                    }
                     showSplash = false
                     // After splash, show onboarding first if not seen; else show tutorial if not seen
                     if alwaysShowOnboarding || !onboardingSeen {
                         showOnboarding = true
                     } else if !tutorialSeen {
                         showTutorial = true
+                    } else if (!loggedIn || alwaysShowLogin) {
+                        showLogin = true
                     }
+                }
+            }
+        }
+        .onChange(of: loggedIn) { newValue in
+            if !newValue {
+                withAnimation(.easeInOut(duration: 0.3)) {
+                    showLogin = true
                 }
             }
         }
