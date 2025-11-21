@@ -54,16 +54,43 @@ struct OnboardingView: View {
                 VStack(spacing: 12) {
                     Text("Categories")
                         .font(.system(.title3, design: .rounded).weight(.heavy))
-                    VStack(alignment: .leading, spacing: 10) {
-                        Text("♻️ Recyclables: Paper, cardboard, cans, bottles")
-                        Text("🧴 Plastic: Containers, bottles, wraps (check local rules)")
-                        Text("🍎 Organic: Food scraps, yard waste")
-                        Text("🧪 Hazardous: Batteries, e‑waste, chemicals")
-                        Text("🗑️ General: Items that can’t be recycled")
+                    VStack(alignment: .leading, spacing: 14) {
+                        VStack(alignment: .leading, spacing: 4) {
+                            Text("♻️ Recyclables")
+                                .font(.system(.headline, design: .rounded).weight(.heavy))
+                            Text("Paper, cardboard, cans, bottles")
+                                .font(.system(.subheadline, design: .rounded))
+                                .foregroundStyle(.secondary)
+                        }
+                        VStack(alignment: .leading, spacing: 4) {
+                            Text("🧴 Plastic")
+                                .font(.system(.headline, design: .rounded).weight(.heavy))
+                            Text("Containers, bottles, wraps (check local rules)")
+                                .font(.system(.subheadline, design: .rounded))
+                                .foregroundStyle(.secondary)
+                        }
+                        VStack(alignment: .leading, spacing: 4) {
+                            Text("🍎 Organic")
+                                .font(.system(.headline, design: .rounded).weight(.heavy))
+                            Text("Food scraps, yard waste")
+                                .font(.system(.subheadline, design: .rounded))
+                                .foregroundStyle(.secondary)
+                        }
+                        VStack(alignment: .leading, spacing: 4) {
+                            Text("🧪 Hazardous")
+                                .font(.system(.headline, design: .rounded).weight(.heavy))
+                            Text("Batteries, e‑waste, chemicals")
+                                .font(.system(.subheadline, design: .rounded))
+                                .foregroundStyle(.secondary)
+                        }
+                        VStack(alignment: .leading, spacing: 4) {
+                            Text("🗑️ General")
+                                .font(.system(.headline, design: .rounded).weight(.heavy))
+                            Text("Items that can’t be recycled")
+                                .font(.system(.subheadline, design: .rounded))
+                                .foregroundStyle(.secondary)
+                        }
                     }
-                    .font(.system(.body, design: .rounded))
-                    .multilineTextAlignment(.leading)
-                    .foregroundStyle(.secondary)
                     .padding(.horizontal)
                 }
                 .padding(16)

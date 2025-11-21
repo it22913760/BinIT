@@ -126,7 +126,7 @@ struct HomeView: View {
     
 
     private var header: some View {
-        Text(NSLocalizedString("app_title", comment: "App title"))
+        Text("Welcome")
             .font(.system(size: 40, weight: .heavy, design: .rounded))
             .kerning(-0.5)
     }
@@ -180,7 +180,7 @@ struct HomeView: View {
                             .foregroundStyle(.secondary)
                     }
                     .padding(12)
-                    .background(EcoTheme.pink)
+                    .background(recentColor(for: item.itemCategory))
                     .ecoCard()
                 }
             }
@@ -235,6 +235,17 @@ struct HomeView: View {
         case .recyclable: return "♻️ " + category.rawValue.capitalized
         case .compost: return "🌿 " + category.rawValue.capitalized
         case .trash: return "🗑️ " + category.rawValue.capitalized
+        }
+    }
+
+    private func recentColor(for category: ItemCategory) -> Color {
+        switch category {
+        case .recyclable:
+            return EcoTheme.green
+        case .compost:
+            return EcoTheme.yellow
+        case .trash:
+            return EcoTheme.red
         }
     }
 }
