@@ -8,8 +8,16 @@ struct TutorialView: View {
 
     var body: some View {
         VStack(spacing: 16) {
-            Text(NSLocalizedString("tutorial_title", comment: ""))
-                .font(.system(.title2, design: .rounded).weight(.heavy))
+            HStack {
+                Text(NSLocalizedString("tutorial_title", comment: ""))
+                    .font(.system(.title2, design: .rounded).weight(.heavy))
+                Spacer()
+                Button(NSLocalizedString("skip", comment: "")) {
+                    onDone?()
+                    dismiss()
+                }
+                .buttonStyle(BWNeubrutalistButtonStyle())
+            }
 
             TabView(selection: $page) {
                 tutorialPage(

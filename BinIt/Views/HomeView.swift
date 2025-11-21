@@ -27,6 +27,10 @@ struct HomeView: View {
                 .pickerStyle(.segmented)
                 .frame(width: 200)
             }
+            Button(NSLocalizedString("view_tutorial", comment: "View Tutorial")) {
+                showTutorial = true
+            }
+            .buttonStyle(BWNeubrutalistButtonStyle())
             Text(NSLocalizedString("sim_tip", comment: "Simulator tip"))
                 .font(.system(.caption, design: .rounded))
                 .foregroundStyle(.secondary)

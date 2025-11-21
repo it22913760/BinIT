@@ -18,8 +18,8 @@ struct SplashView: View {
                         .scaledToFit()
                         .frame(width: 80, height: 80)
                         .foregroundStyle(EcoTheme.green)
-                        .scaleEffect(animate ? 1.05 : 0.95)
-                        .animation(.easeInOut(duration: 0.9).repeatForever(autoreverses: true), value: animate)
+                        .scaleEffect(animate ? 1.06 : 0.94)
+                        .animation(.easeInOut(duration: 0.7).repeatForever(autoreverses: true), value: animate)
                 }
                 Text("BinIt")
                     .font(.system(size: 40, weight: .heavy, design: .rounded))
