@@ -13,6 +13,7 @@ struct HomeView: View {
     @State private var showSettings = false
     @State private var showTutorial = false
     @AppStorage("tutorial.seen") private var tutorialSeen = false
+    @AppStorage("onboarding.seen") private var onboardingSeen = false
     @AppStorage("scanner.usePhotoLibrary") private var usePhotoLibrary = !UIImagePickerController.isSourceTypeAvailable(.camera)
 
     // Define settings sheet view before body to ensure scope visibility
@@ -100,7 +101,8 @@ struct HomeView: View {
             .presentationDetents([.medium, .large])
         }
         .onAppear {
-            if !tutorialSeen { showTutorial = true }
+            // Only auto-show tutorial after onboarding is completed
+            if !tutorialSeen && onboardingSeen { showTutorial = true }
         }
     }
 

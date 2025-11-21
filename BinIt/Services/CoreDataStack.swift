@@ -29,8 +29,25 @@ final class CoreDataStack {
             #endif
         }
         persistentContainer = container
+        let description = persistentContainer.persistentStoreDescriptions.first
+        description?.shouldMigrateStoreAutomatically = true
+        description?.shouldInferMappingModelAutomatically = true
+        let storeURL = description?.url
+        var didAttemptRecreation = false
         persistentContainer.loadPersistentStores { _, error in
-            if let error = error { fatalError("Core Data store failed: \(error)") }
+            if let error = error {
+                if let url = storeURL, !didAttemptRecreation {
+                    didAttemptRecreation = true
+                    try? self.persistentContainer.persistentStoreCoordinator.destroyPersistentStore(at: url, ofType: NSSQLiteStoreType, options: nil)
+                    self.persistentContainer.loadPersistentStores { _, error in
+                        if let error = error {
+                            assertionFailure("Core Data store unrecoverable: \(error)")
+                        }
+                    }
+                } else {
+                    assertionFailure("Core Data store failed: \(error)")
+                }
+            }
         }
         persistentContainer.viewContext.mergePolicy = NSMergeByPropertyObjectTrumpMergePolicy
         persistentContainer.viewContext.automaticallyMergesChangesFromParent = true
