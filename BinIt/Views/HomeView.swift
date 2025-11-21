@@ -7,6 +7,8 @@ struct HomeView: View {
     @Query(sort: [SortDescriptor(\RecycledItem.timestamp, order: .reverse)]) private var items: [RecycledItem]
     @State private var showScanner = false
     @State private var showSettings = false
+    @State private var showTutorial = false
+    @AppStorage("tutorial.seen") private var tutorialSeen = false
     @AppStorage("scanner.usePhotoLibrary") private var usePhotoLibrary = !UIImagePickerController.isSourceTypeAvailable(.camera)
 
     // Define settings sheet view before body to ensure scope visibility
@@ -65,10 +67,32 @@ struct HomeView: View {
                 }
                 .buttonStyle(.plain)
             }
+            ToolbarItem(placement: .topBarLeading) {
+                Button {
+                    showTutorial = true
+                } label: {
+                    Image(systemName: "questionmark.circle.fill")
+                        .foregroundStyle(.black)
+                }
+                .buttonStyle(.plain)
+                .accessibilityLabel(Text("Help"))
+            }
         }
         .sheet(isPresented: $showSettings) {
             NavigationStack { settingsSheet }
                 .presentationDetents([.height(220)])
+        }
+        .sheet(isPresented: $showTutorial) {
+            NavigationStack {
+                TutorialView {
+                    tutorialSeen = true
+                    showTutorial = false
+                }
+            }
+            .presentationDetents([.medium, .large])
+        }
+        .onAppear {
+            if !tutorialSeen { showTutorial = true }
         }
     }
 

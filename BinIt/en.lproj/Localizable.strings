@@ -28,3 +28,13 @@
 "capture" = "Capture";
 "simulator_fallback" = "Simulator detected or camera unavailable — using Photo Library fallback";
 "scan" = "Scan";
+
+"tutorial_title" = "Welcome to BinIt";
+"tut_scan_title" = "Scan Items";
+"tut_scan_body" = "Tap Scan to use your camera or photos to classify an item. On Simulator, use Photos.";
+"tut_categories_title" = "Know the Categories";
+"tut_categories_body" = "♻️ Recyclable • 🌿 Compost • 🗑️ Trash. Clean items recycle best.";
+"tut_tips_title" = "Tips";
+"tut_tips_body" = "Empty, rinse, and dry containers. When in doubt, leave it out to avoid contamination.";
+"back" = "Back";
+"next" = "Next";
