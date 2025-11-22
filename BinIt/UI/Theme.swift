@@ -30,15 +30,15 @@ struct EcoTheme {
 struct IconCircleButtonStyle: ButtonStyle {
     func makeBody(configuration: Configuration) -> some View {
         configuration.label
-            .foregroundColor(.black)
+            .foregroundColor(.primary)
             .frame(width: 34, height: 34)
             .background(
                 ZStack {
-                    Circle().fill(Color.white)
-                    Circle().strokeBorder(Color.black, lineWidth: 3)
+                    Circle().fill(Color(.systemBackground))
+                    Circle().strokeBorder(Color.primary, lineWidth: 3)
                 }
                 .compositingGroup()
-                .shadow(color: .black, radius: 0, x: 3, y: 3)
+                .shadow(color: Color.primary, radius: 0, x: 3, y: 3)
             )
             .contentShape(Circle())
             .scaleEffect(configuration.isPressed ? 1.03 : 1.0)
@@ -54,16 +54,16 @@ struct BWNeubrutalistButtonStyle: ButtonStyle {
     func makeBody(configuration: Configuration) -> some View {
         configuration.label
             .font(.system(.headline, design: .rounded).weight(.heavy))
-            .foregroundColor(.black)
+            .foregroundColor(.primary)
             .padding(.vertical, 14)
             .padding(.horizontal, 28)
             .background(
                 ZStack {
-                    Capsule().fill(Color.white)
-                    Capsule().strokeBorder(Color.black, lineWidth: 3)
+                    Capsule().fill(Color(.systemBackground))
+                    Capsule().strokeBorder(Color.primary, lineWidth: 3)
                 }
                 .compositingGroup()
-                .shadow(color: .black, radius: 0, x: 6, y: 6)
+                .shadow(color: Color.primary, radius: 0, x: 6, y: 6)
             )
             .contentShape(Capsule())
             .scaleEffect(configuration.isPressed ? 1.02 : 1.0)

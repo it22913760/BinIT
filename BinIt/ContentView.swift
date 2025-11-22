@@ -12,6 +12,7 @@ struct ContentView: View {
     @State private var showTutorial: Bool = false
     @State private var showOnboarding: Bool = false
     @State private var showLogin: Bool = false
+    @AppStorage("nav.presentLogin") private var presentLogin = false
     @AppStorage("tutorial.seen") private var tutorialSeen = false
     @AppStorage("onboarding.seen") private var onboardingSeen = false
     @AppStorage("debug.alwaysShowOnboarding") private var alwaysShowOnboarding = false
@@ -22,7 +23,7 @@ struct ContentView: View {
         ZStack {
             NavigationStack {
                 HomeView()
-                    .tint(.black)
+                    .tint(.primary)
             }
             .opacity((showSplash || showOnboarding || showTutorial || showLogin) ? 0 : 1)
 
@@ -68,7 +69,6 @@ struct ContentView: View {
             if showLogin {
                 NavigationStack {
                     LoginView {
-                        loggedIn = true
                         withAnimation(.easeInOut(duration: 0.3)) {
                             showLogin = false
                         }
@@ -87,21 +87,31 @@ struct ContentView: View {
                         loggedIn = false
                     }
                     showSplash = false
-                    // After splash, show onboarding first if not seen; else show tutorial if not seen
+                    // After splash, show onboarding first if not seen; else show tutorial if not seen.
+                    // Login will be presented only after onboarding/tutorial completion.
                     if alwaysShowOnboarding || !onboardingSeen {
                         showOnboarding = true
                     } else if !tutorialSeen {
                         showTutorial = true
-                    } else if (!loggedIn || alwaysShowLogin) {
-                        showLogin = true
+                    } else {
+                        // Home shown directly; if you still want login here when welcome isn't shown, let me know.
                     }
                 }
             }
         }
+        .onChange(of: presentLogin) { needLogin in
+            if needLogin {
+                withAnimation(.easeInOut(duration: 0.3)) { showLogin = true }
+                presentLogin = false
+            }
+        }
         .onChange(of: loggedIn) { newValue in
             if !newValue {
-                withAnimation(.easeInOut(duration: 0.3)) {
-                    showLogin = true
+                // Present login only when not covered by splash/onboarding/tutorial
+                if !showSplash && !showOnboarding && !showTutorial {
+                    withAnimation(.easeInOut(duration: 0.3)) {
+                        showLogin = true
+                    }
                 }
             }
         }

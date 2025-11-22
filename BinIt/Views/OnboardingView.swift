@@ -4,6 +4,7 @@ struct OnboardingView: View {
     var onDone: (() -> Void)? = nil
 
     @State private var page = 0
+    @State private var animateLogo = false
 
     var body: some View {
         VStack(spacing: 16) {
@@ -17,9 +18,11 @@ struct OnboardingView: View {
 
             TabView(selection: $page) {
                 VStack(spacing: 12) {
-                    Image(systemName: "leaf.circle.fill")
-                        .font(.system(size: 48, weight: .heavy))
-                        .foregroundStyle(EcoTheme.green)
+                    logoImage()
+                        .resizable()
+                        .scaledToFit()
+                        .frame(width: 48, height: 48)
+                        .scaleEffect(animateLogo ? 1.08 : 0.92)
                     Text("Welcome to BinIt")
                         .font(.system(.title3, design: .rounded).weight(.heavy))
                     Text("Quickly classify items and learn how to dispose of them responsibly.")
@@ -120,6 +123,28 @@ struct OnboardingView: View {
         }
         .padding(20)
         .background(EcoTheme.offWhite.ignoresSafeArea())
+        .onAppear {
+            // Start a reliable repeating animation for the logo
+            animateLogo = false
+            DispatchQueue.main.async {
+                withAnimation(.easeInOut(duration: 0.9).repeatForever(autoreverses: true)) {
+                    animateLogo = true
+                }
+            }
+        }
+    }
+
+    private func logoImage() -> Image {
+        if let ui = UIImage(named: "Artboard 2") ?? UIImage(named: "Artboard 2@4x") {
+            return Image(uiImage: ui)
+        }
+        if let path = Bundle.main.path(forResource: "Artboard 2@4x", ofType: "png")
+            ?? Bundle.main.path(forResource: "Artboard 2", ofType: "png")
+            ?? Bundle.main.path(forResource: "Artboard 2@4x", ofType: "png", inDirectory: "images")
+            ?? Bundle.main.path(forResource: "Artboard 2", ofType: "png", inDirectory: "images") {
+            if let ui = UIImage(contentsOfFile: path) { return Image(uiImage: ui) }
+        }
+        return Image(systemName: "leaf")
     }
 }
 

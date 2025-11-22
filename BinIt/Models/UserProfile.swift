@@ -16,6 +16,8 @@ final class ProfileStore: ObservableObject {
     @Published var profile: UserProfile {
         didSet { save() }
     }
+    // Transient plain password used only for immediate post-login display; not persisted
+    @Published var transientPlainPassword: String? = nil
 
     private let storageKey = "user.profile.store"
 

@@ -19,6 +19,8 @@ struct HomeView: View {
     @AppStorage("auth.loggedIn") private var loggedIn = false
     @AppStorage("debug.alwaysShowLogin") private var alwaysShowLogin = false
     @AppStorage("scanner.usePhotoLibrary") private var usePhotoLibrary = !UIImagePickerController.isSourceTypeAvailable(.camera)
+    @AppStorage("nav.showProfileAfterLogin") private var showProfileAfterLogin = false
+    @State private var navigateToProfile = false
 
     // Define settings sheet view before body to ensure scope visibility
     private var settingsSheet: some View {
@@ -67,6 +69,9 @@ struct HomeView: View {
 
             ScrollView {
                 VStack(alignment: .leading, spacing: 20) {
+                    // Hidden programmatic navigation trigger to Profile
+                    NavigationLink("", isActive: $navigateToProfile) { ProfileView() }
+                        .hidden()
                     header
                     statsScroll
                     recentGrid
@@ -80,6 +85,7 @@ struct HomeView: View {
         .overlay(alignment: .bottom) {
             fabButton
         }
+        
         .navigationTitle("")
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
@@ -112,6 +118,19 @@ struct HomeView: View {
                 .buttonStyle(IconCircleButtonStyle())
                 .accessibilityLabel(Text("Help"))
             }
+            ToolbarItem(placement: .topBarLeading) {
+                NavigationLink {
+                    AboutView()
+                } label: {
+                    logoImage()
+                        .resizable()
+                        .scaledToFit()
+                        .frame(width: 34, height: 34)
+                        .clipShape(Circle())
+                }
+                .buttonStyle(IconCircleButtonStyle())
+                .accessibilityLabel(Text("About"))
+            }
         }
         .sheet(isPresented: $showSettings) {
             NavigationStack {
@@ -141,6 +160,17 @@ struct HomeView: View {
         .onAppear {
             // Only auto-show tutorial after onboarding is completed
             if !tutorialSeen && onboardingSeen { showTutorial = true }
+            // Handle post-login navigation to Profile
+            if showProfileAfterLogin {
+                navigateToProfile = true
+                showProfileAfterLogin = false
+            }
+        }
+        .onChange(of: showProfileAfterLogin) { newValue in
+            if newValue {
+                navigateToProfile = true
+                showProfileAfterLogin = false
+            }
         }
     }
 
@@ -160,6 +190,7 @@ struct HomeView: View {
                 statCard(title: NSLocalizedString("top_category", comment: "Top Category"), value: topCategoryRecent(), color: EcoTheme.lime)
                 statCard(title: NSLocalizedString("category_diversity", comment: "Category Diversity"), value: categoryDiversityText(), color: EcoTheme.lime)
             }
+            .padding(.horizontal, 20)
             .padding(.vertical, 8)
         }
     }
@@ -216,18 +247,31 @@ struct HomeView: View {
             HStack(spacing: 10) {
                 Image(systemName: "camera.fill")
                     .font(.system(size: 20, weight: .heavy, design: .rounded))
-                    .foregroundColor(.black)
+                    .foregroundColor(.primary)
                 Text(NSLocalizedString("scan", comment: "Scan"))
                     .font(.system(.headline, design: .rounded).weight(.heavy))
-                    .foregroundColor(.black)
+                    .foregroundColor(.primary)
             }
         }
         .buttonStyle(BWNeubrutalistButtonStyle())
         .padding(.bottom, 24)
         .fullScreenCover(isPresented: $showScanner) {
             NavigationStack { ScannerView() }
-                .tint(.black)
+                .tint(.primary)
         }
+    }
+
+    private func logoImage() -> Image {
+        if let ui = UIImage(named: "Artboard 2") ?? UIImage(named: "Artboard 2@4x") {
+            return Image(uiImage: ui)
+        }
+        if let path = Bundle.main.path(forResource: "Artboard 2@4x", ofType: "png")
+            ?? Bundle.main.path(forResource: "Artboard 2", ofType: "png")
+            ?? Bundle.main.path(forResource: "Artboard 2@4x", ofType: "png", inDirectory: "images")
+            ?? Bundle.main.path(forResource: "Artboard 2", ofType: "png", inDirectory: "images") {
+            if let ui = UIImage(contentsOfFile: path) { return Image(uiImage: ui) }
+        }
+        return Image(systemName: "leaf")
     }
 
     private func co2Saved() -> Double {

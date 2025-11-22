@@ -7,6 +7,7 @@ struct ProfileView: View {
     @Environment(\.dismiss) private var dismiss
     @AppStorage("auth.loggedIn") private var loggedIn = true
     @AppStorage("nav.showProfileAfterLogin") private var showProfileAfterLogin = false
+    @AppStorage("nav.presentLogin") private var presentLogin = false
 
     @State private var draftName: String = ""
     @State private var draftPrimaryEmail: String = ""
@@ -23,11 +24,15 @@ struct ProfileView: View {
     var body: some View {
         ScrollView {
             VStack(spacing: 16) {
-                header
-                photoSection
-                formSection
-                emailsSection
-                actionsSection
+                if loggedIn {
+                    header
+                    photoSection
+                    formSection
+                    emailsSection
+                    actionsSection
+                } else {
+                    emptyState
+                }
             }
             .padding(20)
         }
@@ -58,18 +63,23 @@ struct ProfileView: View {
         }
         .overlay(alignment: .top) {
             if showSavedToast {
-                Text("Saved")
-                    .font(.system(.headline, design: .rounded).weight(.heavy))
-                    .foregroundStyle(.black)
-                    .padding(.vertical, 14)
-                    .padding(.horizontal, 28)
-                    .background(EcoTheme.lime)
-                    .clipShape(Capsule())
-                    .overlay(Capsule().stroke(EcoTheme.border, lineWidth: 3))
-                    .shadow(color: .black, radius: 0, x: 6, y: 6)
-                    .padding(.top, 12)
-                    .transition(.move(edge: .top).combined(with: .opacity))
-                    .animation(.spring(response: 0.35, dampingFraction: 0.85), value: showSavedToast)
+                HStack(spacing: 6) {
+                    Image(systemName: "checkmark.circle.fill")
+                    Text("Saved")
+                        .lineLimit(1)
+                        .fixedSize(horizontal: true, vertical: false)
+                }
+                .font(.system(.headline, design: .rounded).weight(.heavy))
+                .foregroundStyle(.black)
+                .padding(.vertical, 14)
+                .padding(.horizontal, 28)
+                .background(EcoTheme.lime)
+                .clipShape(Capsule())
+                .overlay(Capsule().stroke(EcoTheme.border, lineWidth: 3))
+                .shadow(color: .black, radius: 0, x: 6, y: 6)
+                .padding(.top, 12)
+                .transition(.move(edge: .top).combined(with: .opacity))
+                .animation(.spring(response: 0.35, dampingFraction: 0.85), value: showSavedToast)
             }
         }
     }
@@ -83,6 +93,20 @@ struct ProfileView: View {
                 .buttonStyle(BWNeubrutalistButtonStyle())
                 .controlSize(.small)
         }
+    }
+
+    private var emptyState: some View {
+        VStack(spacing: 12) {
+            HStack(spacing: 10) {
+                Button("Login") { presentLogin = true; dismiss() }
+                    .buttonStyle(BWNeubrutalistButtonStyle())
+                    .controlSize(.small)
+                Button("Later") { dismiss() }
+                    .buttonStyle(BWNeubrutalistButtonStyle())
+                    .controlSize(.small)
+            }
+        }
+        .frame(maxWidth: .infinity, minHeight: 300)
     }
 
     private var photoSection: some View {

@@ -1,6 +1,10 @@
 import SwiftUI
+import CryptoKit
 
 struct LoginView: View {
+    @EnvironmentObject var store: ProfileStore
+    @AppStorage("nav.showProfileAfterLogin") private var showProfileAfterLogin = false
+    @AppStorage("auth.loggedIn") private var loggedIn = false
     var onDone: (() -> Void)? = nil
 
     @State private var email: String = ""
@@ -50,7 +54,7 @@ struct LoginView: View {
                 .overlay(RoundedRectangle(cornerRadius: 16).stroke(EcoTheme.border, lineWidth: 2))
             }
 
-            HStack(spacing: 10) {
+            HStack(spacing: 8) {
                 Button(action: submit) {
                     HStack(spacing: 6) {
                         if isLoading { ProgressView().tint(.black) }
@@ -62,6 +66,10 @@ struct LoginView: View {
                 .controlSize(.small)
 
                 Button("Skip now") {
+                    // Skip: just dismiss login and go to Home. Do not set navigation flags.
+                    showProfileAfterLogin = false
+                    store.transientPlainPassword = nil
+                    UserDefaults.standard.set(true, forKey: "auth.skipLogin")
                     onDone?()
                 }
                 .buttonStyle(BWNeubrutalistButtonStyle())
@@ -77,8 +85,32 @@ struct LoginView: View {
         isLoading = true
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.6) {
             isLoading = false
+            let trimmedEmail = email.trimmingCharacters(in: .whitespaces)
+            if !trimmedEmail.isEmpty {
+                store.profile.primaryEmail = trimmedEmail
+                let userFromEmail = trimmedEmail.split(separator: "@").first.map(String.init) ?? ""
+                if (store.profile.username ?? "").isEmpty {
+                    store.profile.username = userFromEmail.isEmpty ? store.profile.username : userFromEmail
+                }
+            }
+            if !password.isEmpty {
+                store.profile.passwordHash = sha256(password)
+                store.profile.password = nil
+                // keep a transient copy (not persisted) so Profile can reveal after confirmation
+                store.transientPlainPassword = password
+            }
+            // Do not navigate to Profile after login; go to Home
+            showProfileAfterLogin = false
+            // mark user as logged in so tapping Profile shows full profile
+            loggedIn = true
             onDone?()
         }
+    }
+
+    private func sha256(_ text: String) -> String {
+        let data = Data(text.utf8)
+        let digest = SHA256.hash(data: data)
+        return digest.compactMap { String(format: "%02x", $0) }.joined()
     }
 }
 
