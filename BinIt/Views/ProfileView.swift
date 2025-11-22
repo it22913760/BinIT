@@ -15,6 +15,7 @@ struct ProfileView: View {
     @State private var photoItem: PhotosPickerItem? = nil
     @State private var isSaving: Bool = false
     @State private var showDeleteConfirm: Bool = false
+    @State private var showSavedToast: Bool = false
 
     var body: some View {
         ScrollView {
@@ -40,6 +41,22 @@ struct ProfileView: View {
                 withAnimation { deleteAccount() }
             }
             Button("Cancel", role: .cancel) { showDeleteConfirm = false }
+        }
+        .overlay(alignment: .top) {
+            if showSavedToast {
+                Text("Saved")
+                    .font(.system(.subheadline, design: .rounded).weight(.heavy))
+                    .foregroundStyle(.black)
+                    .padding(.horizontal, 16)
+                    .padding(.vertical, 10)
+                    .background(EcoTheme.lime)
+                    .clipShape(Capsule())
+                    .overlay(Capsule().stroke(EcoTheme.border, lineWidth: 2))
+                    .shadow(color: .black, radius: 0, x: 4, y: 4)
+                    .padding(.top, 12)
+                    .transition(.move(edge: .top).combined(with: .opacity))
+                    .animation(.spring(response: 0.35, dampingFraction: 0.85), value: showSavedToast)
+            }
         }
     }
 
@@ -246,14 +263,11 @@ struct ProfileView: View {
     }
 
     private var canSave: Bool {
+        // Allow saving as long as required fields are valid.
         let hasName = !draftName.trimmingCharacters(in: .whitespaces).isEmpty
-        let emailOK = isValidEmail(draftPrimaryEmail)
-        let usernameOK = (draftUsername.trimmingCharacters(in: .whitespaces).count >= 3) || (store.profile.username?.isEmpty == false)
-        let passwordOK: Bool = {
-            if !draftPassword.isEmpty { return draftPassword.count >= 6 }
-            return store.profile.passwordHash != nil || (store.profile.password?.isEmpty == false)
-        }()
-        return hasName && emailOK && usernameOK && passwordOK
+        // Email can be empty OR valid format.
+        let emailOK = draftPrimaryEmail.trimmingCharacters(in: .whitespaces).isEmpty || isValidEmail(draftPrimaryEmail)
+        return hasName && emailOK
     }
 
     private var usernameError: String? {
@@ -284,12 +298,21 @@ struct ProfileView: View {
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.4) {
             store.profile.name = draftName.trimmingCharacters(in: .whitespaces)
             store.profile.primaryEmail = draftPrimaryEmail.trimmingCharacters(in: .whitespaces)
-            store.profile.username = draftUsername.trimmingCharacters(in: .whitespaces)
+            let trimmedUser = draftUsername.trimmingCharacters(in: .whitespaces)
+            store.profile.username = trimmedUser.isEmpty ? nil : trimmedUser
             if !draftPassword.isEmpty {
                 store.profile.passwordHash = sha256(draftPassword)
                 store.profile.password = nil
             }
             isSaving = false
+            withAnimation {
+                showSavedToast = true
+            }
+            DispatchQueue.main.asyncAfter(deadline: .now() + 1.6) {
+                withAnimation {
+                    showSavedToast = false
+                }
+            }
         }
     }
 
