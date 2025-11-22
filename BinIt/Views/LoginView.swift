@@ -50,23 +50,26 @@ struct LoginView: View {
                 .overlay(RoundedRectangle(cornerRadius: 16).stroke(EcoTheme.border, lineWidth: 2))
             }
 
-            Button(action: submit) {
-                HStack(spacing: 10) {
-                    if isLoading { ProgressView().tint(.black) }
-                    Text("Login")
+            HStack(spacing: 2) {
+                Button(action: submit) {
+                    HStack(spacing: 10) {
+                        if isLoading { ProgressView().tint(.black) }
+                        Text("Login")
+                    }
                 }
-            }
-            .buttonStyle(BWNeubrutalistButtonStyle())
-            .disabled(isLoading || email.isEmpty || password.isEmpty)
+                .buttonStyle(BWNeubrutalistButtonStyle())
+                .disabled(isLoading || email.isEmpty || password.isEmpty)
+                .frame(maxWidth: .infinity)
 
-            Button("Skip for now") {
-                onDone?()
+                Button("Skip now") {
+                    onDone?()
+                }
+                .buttonStyle(BWNeubrutalistButtonStyle())
+                .frame(maxWidth: .infinity)
             }
-            .buttonStyle(CapsuleButtonStyle())
-
-            Spacer()
         }
         .padding(20)
+        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .center)
         .background(EcoTheme.offWhite.ignoresSafeArea())
     }
 
