@@ -5,6 +5,8 @@ import CryptoKit
 struct ProfileView: View {
     @EnvironmentObject var store: ProfileStore
     @Environment(\.dismiss) private var dismiss
+    @AppStorage("auth.loggedIn") private var loggedIn = true
+    @AppStorage("nav.showProfileAfterLogin") private var showProfileAfterLogin = false
 
     @State private var draftName: String = ""
     @State private var draftPrimaryEmail: String = ""
@@ -16,6 +18,7 @@ struct ProfileView: View {
     @State private var isSaving: Bool = false
     @State private var showDeleteConfirm: Bool = false
     @State private var showSavedToast: Bool = false
+    @State private var showRevealConfirm: Bool = false
 
     var body: some View {
         ScrollView {
@@ -42,17 +45,28 @@ struct ProfileView: View {
             }
             Button("Cancel", role: .cancel) { showDeleteConfirm = false }
         }
+        .alert("Reveal password?", isPresented: $showRevealConfirm) {
+            Button("Reveal", role: .none) {
+                if let plain = store.transientPlainPassword {
+                    draftPassword = plain
+                    isSecurePassword = false
+                }
+            }
+            Button("Cancel", role: .cancel) { showRevealConfirm = false }
+        } message: {
+            Text("You are about to reveal your password on screen.")
+        }
         .overlay(alignment: .top) {
             if showSavedToast {
                 Text("Saved")
-                    .font(.system(.subheadline, design: .rounded).weight(.heavy))
+                    .font(.system(.headline, design: .rounded).weight(.heavy))
                     .foregroundStyle(.black)
-                    .padding(.horizontal, 16)
-                    .padding(.vertical, 10)
+                    .padding(.vertical, 14)
+                    .padding(.horizontal, 28)
                     .background(EcoTheme.lime)
                     .clipShape(Capsule())
-                    .overlay(Capsule().stroke(EcoTheme.border, lineWidth: 2))
-                    .shadow(color: .black, radius: 0, x: 4, y: 4)
+                    .overlay(Capsule().stroke(EcoTheme.border, lineWidth: 3))
+                    .shadow(color: .black, radius: 0, x: 6, y: 6)
                     .padding(.top, 12)
                     .transition(.move(edge: .top).combined(with: .opacity))
                     .animation(.spring(response: 0.35, dampingFraction: 0.85), value: showSavedToast)
@@ -94,7 +108,12 @@ struct ProfileView: View {
 
             HStack(spacing: 8) {
                 PhotosPicker(selection: $photoItem, matching: .images) {
-                    Label("Add photo", systemImage: "photo.on.rectangle")
+                    HStack(spacing: 6) {
+                        Image(systemName: "photo.on.rectangle")
+                        Text("Add photo")
+                            .lineLimit(1)
+                            .fixedSize(horizontal: true, vertical: false)
+                    }
                 }
                 .onChange(of: photoItem) { _, newItem in
                     Task {
@@ -105,11 +124,13 @@ struct ProfileView: View {
                 }
                 .buttonStyle(BWNeubrutalistButtonStyle())
                 .controlSize(.small)
+                .scaleEffect(0.9)
 
                 if store.profile.profileImageData != nil {
                     Button("Remove photo") { store.profile.profileImageData = nil }
                         .buttonStyle(BWNeubrutalistButtonStyle())
                         .controlSize(.small)
+                        .scaleEffect(0.9)
                 }
             }
         }
@@ -169,7 +190,14 @@ struct ProfileView: View {
                         TextField("Password", text: $draftPassword)
                     }
                 }
-                Button(action: { isSecurePassword.toggle() }) {
+                Button(action: {
+                    if isSecurePassword && draftPassword.isEmpty && store.transientPlainPassword != nil {
+                        // Ask confirmation before revealing a password coming from login
+                        showRevealConfirm = true
+                    } else {
+                        isSecurePassword.toggle()
+                    }
+                }) {
                     Image(systemName: isSecurePassword ? "eye.slash.fill" : "eye.fill")
                 }
                 Button(role: .destructive) { draftPassword = "" } label: {
@@ -303,6 +331,8 @@ struct ProfileView: View {
             if !draftPassword.isEmpty {
                 store.profile.passwordHash = sha256(draftPassword)
                 store.profile.password = nil
+                // Clear transient plain after saving a new password
+                store.transientPlainPassword = nil
             }
             isSaving = false
             withAnimation {
@@ -333,6 +363,10 @@ struct ProfileView: View {
     private func deleteAccount() {
         store.profile = .empty
         loadDrafts()
+        // Navigate to Login: mark user as logged out and dismiss this screen
+        showProfileAfterLogin = false
+        loggedIn = false
+        dismiss()
     }
 
     private func sha256(_ text: String) -> String {
