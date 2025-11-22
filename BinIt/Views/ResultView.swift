@@ -94,20 +94,28 @@ struct ResultView: View {
                 dismiss()
             } label: {
                 Text(NSLocalizedString("discard", comment: "Discard"))
+                    .lineLimit(1)
+                    .fixedSize(horizontal: true, vertical: false)
             }
             .buttonStyle(BWNeubrutalistButtonStyle())
+            .controlSize(.small)
+            .scaleEffect(0.9)
             .frame(maxWidth: .infinity)
 
             Button {
                 guard let res = result, let img = image, let data = img.jpegData(compressionQuality: 0.85) else { return }
                 onSave(res.name, res.category, res.confidence, data)
             } label: {
-                HStack(spacing: 10) {
+                HStack(spacing: 6) {
                     Image(systemName: "tray.and.arrow.down.fill")
                     Text(NSLocalizedString("save", comment: "Save"))
+                        .lineLimit(1)
+                        .fixedSize(horizontal: true, vertical: false)
                 }
             }
             .buttonStyle(BWNeubrutalistButtonStyle())
+            .controlSize(.small)
+            .scaleEffect(0.9)
             .frame(maxWidth: .infinity)
 
             Button {
@@ -115,12 +123,16 @@ struct ResultView: View {
                 let name = result?.name ?? NSLocalizedString("unknown_item", comment: "Unknown")
                 onSave(name, .trash, result?.confidence ?? 0, data)
             } label: {
-                HStack(spacing: 10) {
+                HStack(spacing: 6) {
                     Image(systemName: "trash.fill")
                     Text(NSLocalizedString("mark_trash", comment: "Trash"))
+                        .lineLimit(1)
+                        .fixedSize(horizontal: true, vertical: false)
                 }
             }
             .buttonStyle(DestructiveCapsuleButtonStyle())
+            .controlSize(.small)
+            .scaleEffect(0.9)
             .frame(maxWidth: .infinity)
         }
     }
