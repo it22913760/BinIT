@@ -84,6 +84,16 @@ struct HomeView: View {
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
             ToolbarItem(placement: .topBarTrailing) {
+                NavigationLink {
+                    ProfileView()
+                } label: {
+                    Image(systemName: "person.crop.circle.fill")
+                        .font(.system(size: 14, weight: .heavy, design: .rounded))
+                }
+                .buttonStyle(IconCircleButtonStyle())
+                .accessibilityLabel(Text("Profile"))
+            }
+            ToolbarItem(placement: .topBarTrailing) {
                 Button {
                     showSettings = true
                 } label: {

@@ -11,12 +11,14 @@ import CoreData
 @main
 struct BinItApp: App {
     private let persistentContainer = CoreDataStack.shared.persistentContainer
+    @StateObject private var profileStore = ProfileStore()
 
     var body: some Scene {
         WindowGroup {
             ContentView()
                 .preferredColorScheme(.light)
                 .environment(\.managedObjectContext, persistentContainer.viewContext)
+                .environmentObject(profileStore)
         }
     }
 }

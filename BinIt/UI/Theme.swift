@@ -31,14 +31,14 @@ struct IconCircleButtonStyle: ButtonStyle {
     func makeBody(configuration: Configuration) -> some View {
         configuration.label
             .foregroundColor(.black)
-            .frame(width: 38, height: 38)
+            .frame(width: 34, height: 34)
             .background(
                 ZStack {
                     Circle().fill(Color.white)
                     Circle().strokeBorder(Color.black, lineWidth: 3)
                 }
                 .compositingGroup()
-                .shadow(color: .black, radius: 0, x: 6, y: 6)
+                .shadow(color: .black, radius: 0, x: 3, y: 3)
             )
             .contentShape(Circle())
             .scaleEffect(configuration.isPressed ? 1.03 : 1.0)

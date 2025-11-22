@@ -50,22 +50,22 @@ struct LoginView: View {
                 .overlay(RoundedRectangle(cornerRadius: 16).stroke(EcoTheme.border, lineWidth: 2))
             }
 
-            HStack(spacing: 2) {
+            HStack(spacing: 10) {
                 Button(action: submit) {
-                    HStack(spacing: 10) {
+                    HStack(spacing: 6) {
                         if isLoading { ProgressView().tint(.black) }
                         Text("Login")
                     }
                 }
                 .buttonStyle(BWNeubrutalistButtonStyle())
                 .disabled(isLoading || email.isEmpty || password.isEmpty)
-                .frame(maxWidth: .infinity)
+                .controlSize(.small)
 
                 Button("Skip now") {
                     onDone?()
                 }
                 .buttonStyle(BWNeubrutalistButtonStyle())
-                .frame(maxWidth: .infinity)
+                .controlSize(.small)
             }
         }
         .padding(20)
