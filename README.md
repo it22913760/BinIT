@@ -99,7 +99,7 @@ BinIt is an iOS app that helps users classify items into Recyclable, Compost, Tr
 - Open issues and PRs are welcome. Please describe changes clearly and include screenshots for UI updates.
 
 ## License
-- MIT (or update to your preferred license). See `LICENSE` if provided; otherwise, add one before publishing.
+- MIT License. See `LICENSE` for full text. © 2025 Hasith Bulathgama.
 
 ## Contact
 - Author: Hasith Bulathgama
