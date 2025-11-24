@@ -22,19 +22,23 @@ struct ProfileView: View {
     @State private var showRevealConfirm: Bool = false
 
     var body: some View {
-        ScrollView {
-            VStack(spacing: 16) {
-                if loggedIn {
-                    header
-                    photoSection
-                    formSection
-                    emailsSection
-                    actionsSection
-                } else {
-                    emptyState
+        Group {
+            if loggedIn {
+                ScrollView {
+                    VStack(spacing: 16) {
+                        header
+                        photoSection
+                        formSection
+                        emailsSection
+                        actionsSection
+                    }
+                    .padding(20)
                 }
+            } else {
+                // Full-height centered empty state when logged out
+                emptyState
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
             }
-            .padding(20)
         }
         .background(EcoTheme.offWhite.ignoresSafeArea())
         .navigationTitle("Profile")
@@ -51,7 +55,7 @@ struct ProfileView: View {
             Button("Cancel", role: .cancel) { showDeleteConfirm = false }
         }
         .alert("Reveal password?", isPresented: $showRevealConfirm) {
-            Button("Reveal", role: .none) {
+            Button("Reveal") {
                 if let plain = store.transientPlainPassword {
                     draftPassword = plain
                     isSecurePassword = false
@@ -84,6 +88,7 @@ struct ProfileView: View {
         }
     }
 
+    // MARK: - Header
     private var header: some View {
         HStack {
             Text("Manage your account")
@@ -95,9 +100,11 @@ struct ProfileView: View {
         }
     }
 
+    // MARK: - Empty State
     private var emptyState: some View {
-        VStack(spacing: 12) {
-            HStack(spacing: 10) {
+        VStack {
+            Spacer()
+            HStack(spacing: 12) {
                 Button("Login") { presentLogin = true; dismiss() }
                     .buttonStyle(BWNeubrutalistButtonStyle())
                     .controlSize(.small)
@@ -105,13 +112,17 @@ struct ProfileView: View {
                     .buttonStyle(BWNeubrutalistButtonStyle())
                     .controlSize(.small)
             }
+            .frame(maxWidth: .infinity, alignment: .center)
+            Spacer()
         }
-        .frame(maxWidth: .infinity, minHeight: 300)
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
     }
 
+    // MARK: - Photo Section (iOS 16-compatible)
     private var photoSection: some View {
         VStack(spacing: 12) {
-            if let data = store.profile.profileImageData, let ui = UIImage(data: data) {
+            if let data = store.profile.profileImageData,
+               let ui = UIImage(data: data) {
                 Image(uiImage: ui)
                     .resizable()
                     .scaledToFill()
@@ -135,11 +146,10 @@ struct ProfileView: View {
                     HStack(spacing: 6) {
                         Image(systemName: "photo.on.rectangle")
                         Text("Add photo")
-                            .lineLimit(1)
-                            .fixedSize(horizontal: true, vertical: false)
                     }
                 }
-                .onChange(of: photoItem) { _, newItem in
+                // ✅ FIXED: iOS 16 safe
+                .onChange(of: photoItem) { newItem in
                     Task {
                         if let data = try? await newItem?.loadTransferable(type: Data.self) {
                             store.profile.profileImageData = data
@@ -160,8 +170,11 @@ struct ProfileView: View {
         }
     }
 
+    // MARK: - Form Section
     private var formSection: some View {
         VStack(spacing: 12) {
+
+            // Name
             HStack {
                 Image(systemName: "person.fill")
                 TextField("Full name", text: $draftName)
@@ -170,13 +183,10 @@ struct ProfileView: View {
                     Image(systemName: "xmark.circle.fill")
                 }
                 .buttonStyle(IconCircleButtonStyle())
-                .controlSize(.mini)
             }
-            .padding(10)
-            .background(Color.white)
-            .clipShape(RoundedRectangle(cornerRadius: 12))
-            .overlay(RoundedRectangle(cornerRadius: 12).stroke(EcoTheme.border, lineWidth: 2))
+            .formFieldStyle()
 
+            // Username
             HStack {
                 Image(systemName: "person")
                 TextField("Username", text: $draftUsername)
@@ -186,13 +196,10 @@ struct ProfileView: View {
                     Image(systemName: "xmark.circle.fill")
                 }
                 .buttonStyle(IconCircleButtonStyle())
-                .controlSize(.mini)
             }
-            .padding(10)
-            .background(Color.white)
-            .clipShape(RoundedRectangle(cornerRadius: 12))
-            .overlay(RoundedRectangle(cornerRadius: 12).stroke(EcoTheme.border, lineWidth: 2))
+            .formFieldStyle()
 
+            // Email
             HStack {
                 Image(systemName: "envelope.fill")
                 TextField("Primary email", text: $draftPrimaryEmail)
@@ -200,11 +207,9 @@ struct ProfileView: View {
                     .keyboardType(.emailAddress)
                     .autocorrectionDisabled(true)
             }
-            .padding(10)
-            .background(Color.white)
-            .clipShape(RoundedRectangle(cornerRadius: 12))
-            .overlay(RoundedRectangle(cornerRadius: 12).stroke(EcoTheme.border, lineWidth: 2))
+            .formFieldStyle()
 
+            // Password
             HStack {
                 Image(systemName: "lock.fill")
                 Group {
@@ -214,35 +219,32 @@ struct ProfileView: View {
                         TextField("Password", text: $draftPassword)
                     }
                 }
-                Button(action: {
-                    if isSecurePassword && draftPassword.isEmpty && store.transientPlainPassword != nil {
-                        // Ask confirmation before revealing a password coming from login
+                Button {
+                    if isSecurePassword &&
+                        draftPassword.isEmpty &&
+                        store.transientPlainPassword != nil {
                         showRevealConfirm = true
                     } else {
                         isSecurePassword.toggle()
                     }
-                }) {
+                } label: {
                     Image(systemName: isSecurePassword ? "eye.slash.fill" : "eye.fill")
                 }
                 Button(role: .destructive) { draftPassword = "" } label: {
                     Image(systemName: "xmark.circle.fill")
                 }
                 .buttonStyle(IconCircleButtonStyle())
-                .controlSize(.mini)
             }
-            .padding(10)
-            .background(Color.white)
-            .clipShape(RoundedRectangle(cornerRadius: 12))
-            .overlay(RoundedRectangle(cornerRadius: 12).stroke(EcoTheme.border, lineWidth: 2))
+            .formFieldStyle()
 
-            // Validation messages
+            // Validation
             if let userErr = usernameError {
                 Text(userErr).font(.caption).foregroundStyle(.red)
             }
             if let passErr = passwordError {
                 Text(passErr).font(.caption).foregroundStyle(.red)
             }
-            // Masked password status
+
             if store.profile.passwordHash != nil && draftPassword.isEmpty {
                 Text("Password is set (hidden)")
                     .font(.caption)
@@ -261,6 +263,7 @@ struct ProfileView: View {
         }
     }
 
+    // MARK: - Emails Section
     private var emailsSection: some View {
         VStack(alignment: .leading, spacing: 10) {
             Text("Additional emails")
@@ -269,18 +272,13 @@ struct ProfileView: View {
             ForEach(Array(store.profile.additionalEmails.enumerated()), id: \.offset) { index, email in
                 HStack {
                     Text(email)
-                        .font(.system(.callout, design: .rounded))
                     Spacer()
                     Button(role: .destructive) { removeEmail(at: index) } label: {
                         Image(systemName: "trash")
                     }
                     .buttonStyle(BWNeubrutalistButtonStyle())
-                    .controlSize(.small)
                 }
-                .padding(10)
-                .background(Color.white)
-                .clipShape(RoundedRectangle(cornerRadius: 12))
-                .overlay(RoundedRectangle(cornerRadius: 12).stroke(EcoTheme.border, lineWidth: 2))
+                .formFieldStyle()
             }
 
             HStack {
@@ -294,13 +292,11 @@ struct ProfileView: View {
                     .disabled(!isValidEmail(newEmail))
                     .controlSize(.small)
             }
-            .padding(10)
-            .background(Color.white)
-            .clipShape(RoundedRectangle(cornerRadius: 12))
-            .overlay(RoundedRectangle(cornerRadius: 12).stroke(EcoTheme.border, lineWidth: 2))
+            .formFieldStyle()
         }
     }
 
+    // MARK: - Delete Section
     private var actionsSection: some View {
         VStack(spacing: 8) {
             Button(role: .destructive) {
@@ -314,22 +310,25 @@ struct ProfileView: View {
         .padding(.top, 8)
     }
 
+    // MARK: - Logic
     private var canSave: Bool {
-        // Allow saving as long as required fields are valid.
         let hasName = !draftName.trimmingCharacters(in: .whitespaces).isEmpty
-        // Email can be empty OR valid format.
-        let emailOK = draftPrimaryEmail.trimmingCharacters(in: .whitespaces).isEmpty || isValidEmail(draftPrimaryEmail)
+        let emailOK = draftPrimaryEmail.trimmingCharacters(in: .whitespaces).isEmpty
+                        || isValidEmail(draftPrimaryEmail)
         return hasName && emailOK
     }
 
     private var usernameError: String? {
-        if draftUsername.trimmingCharacters(in: .whitespaces).isEmpty { return "Username is required (min 3 chars)" }
-        if draftUsername.trimmingCharacters(in: .whitespaces).count < 3 { return "Username must be at least 3 characters" }
+        let trimmed = draftUsername.trimmingCharacters(in: .whitespaces)
+        if trimmed.isEmpty { return "Username is required (min 3 chars)" }
+        if trimmed.count < 3 { return "Username must be at least 3 characters" }
         return nil
     }
 
     private var passwordError: String? {
-        if !draftPassword.isEmpty && draftPassword.count < 6 { return "Password must be at least 6 characters" }
+        if !draftPassword.isEmpty && draftPassword.count < 6 {
+            return "Password must be at least 6 characters"
+        }
         return nil
     }
 
@@ -337,11 +336,13 @@ struct ProfileView: View {
         draftName = store.profile.name
         draftPrimaryEmail = store.profile.primaryEmail
         draftUsername = store.profile.username ?? ""
-        // Migrate plain password to hash if needed
-        if let plain = store.profile.password, (store.profile.passwordHash == nil || store.profile.passwordHash?.isEmpty == true) {
+
+        if let plain = store.profile.password,
+           (store.profile.passwordHash == nil || store.profile.passwordHash?.isEmpty == true) {
             store.profile.passwordHash = sha256(plain)
             store.profile.password = nil
         }
+
         draftPassword = ""
     }
 
@@ -352,42 +353,38 @@ struct ProfileView: View {
             store.profile.primaryEmail = draftPrimaryEmail.trimmingCharacters(in: .whitespaces)
             let trimmedUser = draftUsername.trimmingCharacters(in: .whitespaces)
             store.profile.username = trimmedUser.isEmpty ? nil : trimmedUser
+
             if !draftPassword.isEmpty {
                 store.profile.passwordHash = sha256(draftPassword)
-                store.profile.password = nil
-                // Clear transient plain after saving a new password
                 store.transientPlainPassword = nil
             }
+
             isSaving = false
-            withAnimation {
-                showSavedToast = true
-            }
+            withAnimation { showSavedToast = true }
+
             DispatchQueue.main.asyncAfter(deadline: .now() + 1.6) {
-                withAnimation {
-                    showSavedToast = false
-                }
+                withAnimation { showSavedToast = false }
             }
         }
     }
 
     private func addEmail() {
         let email = newEmail.trimmingCharacters(in: .whitespaces)
-        guard isValidEmail(email) else { return }
-        if !store.profile.additionalEmails.contains(email) {
+        if isValidEmail(email) && !store.profile.additionalEmails.contains(email) {
             store.profile.additionalEmails.append(email)
         }
         newEmail = ""
     }
 
     private func removeEmail(at index: Int) {
-        guard store.profile.additionalEmails.indices.contains(index) else { return }
-        store.profile.additionalEmails.remove(at: index)
+        if store.profile.additionalEmails.indices.contains(index) {
+            store.profile.additionalEmails.remove(at: index)
+        }
     }
 
     private func deleteAccount() {
         store.profile = .empty
         loadDrafts()
-        // Navigate to Login: mark user as logged out and dismiss this screen
         showProfileAfterLogin = false
         loggedIn = false
         dismiss()
@@ -396,7 +393,7 @@ struct ProfileView: View {
     private func sha256(_ text: String) -> String {
         let data = Data(text.utf8)
         let digest = SHA256.hash(data: data)
-        return digest.compactMap { String(format: "%02x", $0) }.joined()
+        return digest.map { String(format: "%02x", $0) }.joined()
     }
 
     private func isValidEmail(_ email: String) -> Bool {
@@ -405,7 +402,17 @@ struct ProfileView: View {
     }
 }
 
-// ... (rest of the code remains the same)
+// MARK: - Helper modifier
+extension View {
+    func formFieldStyle() -> some View {
+        self
+            .padding(10)
+            .background(Color.white)
+            .clipShape(RoundedRectangle(cornerRadius: 12))
+            .overlay(RoundedRectangle(cornerRadius: 12).stroke(EcoTheme.border, lineWidth: 2))
+    }
+}
+
 #Preview {
     NavigationStack {
         ProfileView()

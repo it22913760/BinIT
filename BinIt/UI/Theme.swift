@@ -27,6 +27,70 @@ struct EcoTheme {
     }
 }
 
+struct CategoryTheme {
+    static func color(for category: ItemCategory) -> Color {
+        switch category {
+        case .recyclable: return EcoTheme.blue
+        case .compost: return EcoTheme.green
+        case .trash: return EcoTheme.red
+        case .human: return EcoTheme.lavender
+        }
+    }
+
+    static func emoji(for category: ItemCategory) -> String {
+        switch category {
+        case .recyclable: return "♻️"
+        case .compost: return "🌿"
+        case .trash: return "🗑️"
+        case .human: return "🚫"
+        }
+    }
+
+    static func badgeText(for category: ItemCategory) -> String {
+        switch category {
+        case .recyclable: return NSLocalizedString("badge_recycle", comment: "Recycle Me")
+        case .compost: return NSLocalizedString("badge_compost", comment: "Compostable")
+        case .trash: return NSLocalizedString("badge_trash", comment: "Trash Can")
+        case .human: return "Human — Not compostable"
+        }
+    }
+
+    static func whyTitle(for category: ItemCategory) -> String {
+        switch category {
+        case .recyclable: return "Why recycle this?"
+        case .compost: return "Why compost this?"
+        case .trash: return "Why trash this?"
+        case .human: return "Why not compostable?"
+        }
+    }
+
+    static func dos(for category: ItemCategory) -> [String] {
+        switch category {
+        case .recyclable:
+            return ["Rinse containers", "Flatten boxes", "Check local rules"]
+        case .compost:
+            return ["Remove stickers", "Chop large scraps", "Keep plastics out"]
+        case .trash:
+            return ["Bag small pieces", "Reduce & reuse first"]
+        case .human:
+            return ["Respect privacy", "Use images for recognition only"]
+        }
+    }
+
+    static func donts(for category: ItemCategory) -> [String] {
+        switch category {
+        case .recyclable:
+            return ["No food residue", "No soft films unless accepted"]
+        case .compost:
+            return ["No plastics", "No glass/metal", "No liquids"]
+        case .trash:
+            return ["Don't mix with recyclables", "Don't litter"]
+        case .human:
+            return ["Do not save or share without consent", "Do not treat as waste item"]
+        }
+    }
+}
+
 struct IconCircleButtonStyle: ButtonStyle {
     func makeBody(configuration: Configuration) -> some View {
         configuration.label

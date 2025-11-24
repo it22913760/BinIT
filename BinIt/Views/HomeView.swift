@@ -20,6 +20,9 @@ struct HomeView: View {
     @AppStorage("debug.alwaysShowLogin") private var alwaysShowLogin = false
     @AppStorage("scanner.usePhotoLibrary") private var usePhotoLibrary = !UIImagePickerController.isSourceTypeAvailable(.camera)
     @AppStorage("nav.showProfileAfterLogin") private var showProfileAfterLogin = false
+    @AppStorage("ui.showTopPredictions") private var showTopPredictions = true
+    @AppStorage("ui.showHumanBadge") private var showHumanBadge = true
+    @AppStorage("debug.showClassifierDebug") private var showClassifierDebug = false
     @State private var navigateToProfile = false
 
     // Define settings sheet view before body to ensure scope visibility
@@ -38,10 +41,21 @@ struct HomeView: View {
                 .pickerStyle(.segmented)
                 .frame(width: 200)
             }
+            Toggle("Show top-3 predictions", isOn: $showTopPredictions)
+                .font(.system(.subheadline, design: .rounded).weight(.heavy))
+            Toggle("Show human detection badge", isOn: $showHumanBadge)
+                .font(.system(.subheadline, design: .rounded).weight(.heavy))
+            Toggle("Show classifier debug (labels/human)", isOn: $showClassifierDebug)
+                .font(.system(.subheadline, design: .rounded).weight(.heavy))
             Toggle("Always show onboarding on launch (debug)", isOn: $alwaysShowOnboarding)
                 .font(.system(.subheadline, design: .rounded).weight(.heavy))
             Toggle("Always show login on launch (debug)", isOn: $alwaysShowLogin)
                 .font(.system(.subheadline, design: .rounded).weight(.heavy))
+            Button("Reset welcome screens") {
+                onboardingSeen = false
+                tutorialSeen = false
+            }
+            .buttonStyle(BWNeubrutalistButtonStyle())
             Button(NSLocalizedString("view_tutorial", comment: "View Tutorial")) {
                 showTutorial = true
             }
@@ -297,22 +311,13 @@ struct HomeView: View {
     }
 
     private func categoryDisplayName(_ category: ItemCategory) -> String {
-        switch category {
-        case .recyclable: return "♻️ " + category.rawValue.capitalized
-        case .compost: return "🌿 " + category.rawValue.capitalized
-        case .trash: return "🗑️ " + category.rawValue.capitalized
-        }
+        let emoji = CategoryTheme.emoji(for: category)
+        if category == .human { return emoji + " Human — Not compostable" }
+        return emoji + " " + category.rawValue.capitalized
     }
 
     private func recentColor(for category: ItemCategory) -> Color {
-        switch category {
-        case .recyclable:
-            return EcoTheme.blue
-        case .compost:
-            return EcoTheme.green
-        case .trash:
-            return EcoTheme.red
-        }
+        return CategoryTheme.color(for: category)
     }
 }
 

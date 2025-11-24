@@ -13,72 +13,79 @@ struct LoginView: View {
     @State private var isLoading: Bool = false
 
     var body: some View {
-        VStack(spacing: 20) {
-            VStack(spacing: 8) {
-                Text("Welcome back")
-                    .font(.system(.title2, design: .rounded).weight(.heavy))
-                Text("Login to continue")
-                    .font(.system(.subheadline, design: .rounded))
-                    .foregroundStyle(.secondary)
-            }
+        ZStack {
+            EcoTheme.offWhite.ignoresSafeArea()
+            VStack {
+                Spacer()
+                VStack(spacing: 20) {
+                    VStack(spacing: 8) {
+                        Text("Welcome back")
+                            .font(.system(.title2, design: .rounded).weight(.heavy))
+                        Text("Login to continue")
+                            .font(.system(.subheadline, design: .rounded))
+                            .foregroundStyle(.secondary)
+                    }
 
-            VStack(spacing: 12) {
-                HStack {
-                    Image(systemName: "envelope.fill")
-                    TextField("Email", text: $email)
-                        .textInputAutocapitalization(.never)
-                        .keyboardType(.emailAddress)
-                        .autocorrectionDisabled(true)
-                }
-                .padding(14)
-                .background(Color.white)
-                .clipShape(RoundedRectangle(cornerRadius: 16))
-                .overlay(RoundedRectangle(cornerRadius: 16).stroke(EcoTheme.border, lineWidth: 2))
-
-                HStack {
-                    Image(systemName: "lock.fill")
-                    Group {
-                        if isSecure {
-                            SecureField("Password", text: $password)
-                        } else {
-                            TextField("Password", text: $password)
+                    VStack(spacing: 12) {
+                        HStack {
+                            Image(systemName: "envelope.fill")
+                            TextField("Email", text: $email)
+                                .textInputAutocapitalization(.never)
+                                .keyboardType(.emailAddress)
+                                .autocorrectionDisabled(true)
                         }
-                    }
-                    Button(action: { isSecure.toggle() }) {
-                        Image(systemName: isSecure ? "eye.slash.fill" : "eye.fill")
-                    }
-                }
-                .padding(14)
-                .background(Color.white)
-                .clipShape(RoundedRectangle(cornerRadius: 16))
-                .overlay(RoundedRectangle(cornerRadius: 16).stroke(EcoTheme.border, lineWidth: 2))
-            }
+                        .padding(14)
+                        .background(Color.white)
+                        .clipShape(RoundedRectangle(cornerRadius: 16))
+                        .overlay(RoundedRectangle(cornerRadius: 16).stroke(EcoTheme.border, lineWidth: 2))
 
-            HStack(spacing: 8) {
-                Button(action: submit) {
-                    HStack(spacing: 6) {
-                        if isLoading { ProgressView().tint(.black) }
-                        Text("Login")
+                        HStack {
+                            Image(systemName: "lock.fill")
+                            Group {
+                                if isSecure {
+                                    SecureField("Password", text: $password)
+                                } else {
+                                    TextField("Password", text: $password)
+                                }
+                            }
+                            Button(action: { isSecure.toggle() }) {
+                                Image(systemName: isSecure ? "eye.slash.fill" : "eye.fill")
+                            }
+                        }
+                        .padding(14)
+                        .background(Color.white)
+                        .clipShape(RoundedRectangle(cornerRadius: 16))
+                        .overlay(RoundedRectangle(cornerRadius: 16).stroke(EcoTheme.border, lineWidth: 2))
                     }
-                }
-                .buttonStyle(BWNeubrutalistButtonStyle())
-                .disabled(isLoading || email.isEmpty || password.isEmpty)
-                .controlSize(.small)
 
-                Button("Skip now") {
-                    // Skip: just dismiss login and go to Home. Do not set navigation flags.
-                    showProfileAfterLogin = false
-                    store.transientPlainPassword = nil
-                    UserDefaults.standard.set(true, forKey: "auth.skipLogin")
-                    onDone?()
+                    HStack(spacing: 8) {
+                        Button(action: submit) {
+                            HStack(spacing: 6) {
+                                if isLoading { ProgressView().tint(.black) }
+                                Text("Login")
+                            }
+                        }
+                        .buttonStyle(BWNeubrutalistButtonStyle())
+                        .disabled(isLoading || email.isEmpty || password.isEmpty)
+                        .controlSize(.small)
+
+                        Button("Skip now") {
+                            showProfileAfterLogin = false
+                            store.transientPlainPassword = nil
+                            UserDefaults.standard.set(true, forKey: "auth.skipLogin")
+                            onDone?()
+                        }
+                        .buttonStyle(BWNeubrutalistButtonStyle())
+                        .controlSize(.small)
+                    }
+                    .frame(maxWidth: .infinity, alignment: .center)
                 }
-                .buttonStyle(BWNeubrutalistButtonStyle())
-                .controlSize(.small)
+                .padding(20)
+                .frame(maxWidth: 480)
+                Spacer()
             }
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
         }
-        .padding(20)
-        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .center)
-        .background(EcoTheme.offWhite.ignoresSafeArea())
     }
 
     private func submit() {
